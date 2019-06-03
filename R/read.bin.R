@@ -84,9 +84,9 @@ read.fit.bin<-function(filename.mcmc1,filename.mcmc2,filename.hsz,stoxdata){
     wgl.cc<-make.fit.structure.lgawgl(par2$wgl.cov.cc,info2,par2$nMCMC)
   }
   for(i in 1:par2$nMCMC){
-    wgl<-(read.mcmc.it(fp2,i,wgl,par2$wgl.cov,0))$structure
+    wgl<-(read.mcmc.it(fp2,i,wgl,par2$wgl.cov,par2$print.boat))$structure
     if(par2$cc){
-      wgl.cc<-(read.mcmc.it(fp2,i,wgl.cc,par2$wgl.cov.cc,0))$structure
+      wgl.cc<-(read.mcmc.it(fp2,i,wgl.cc,par2$wgl.cov.cc,par2$print.boat))$structure
     }
   }
   close(fp2)
@@ -122,7 +122,7 @@ read.mcmc.it<-function(fp,it,structure,cov,print.boat,hsz=0){
     ncov<-cov$ncov[i]
     if(i==1){
       nlev<-cov$int.nlev
-      if(cov$nxcov==1){ # Haul effects are not printed for the age model
+      if(cov$nxcov==1){ # Haul effects are not printed for the age model in the mcmc file
         ncov<-ncov-1
         nlev<-nlev[-length(nlev)]
       }
@@ -133,6 +133,8 @@ read.mcmc.it<-function(fp,it,structure,cov,print.boat,hsz=0){
       for(j in 1:ncov){
         if(nm[j]=="boat" & print.boat==1){
           structure[[i]]$cov[[j]][a,,it]<-readBin(fp,double(),n=nlev[j],endian="little") 
+        } else if(nm[j]=="boat" & print.boat==0){ #No boat effect printed in the mcmc file
+          structure[[i]]$cov[[j]][a,,it]<-NA
         } else {
           structure[[i]]$cov[[j]][a,,it]<-readBin(fp,double(),n=nlev[j],endian="little")
         }
@@ -275,13 +277,14 @@ read.params.1<-function(fp){
 read.params.2<-function(fp){
   nMCMC <- readBin(fp,integer(),n=1,endian="little")
   num.par <- readBin(fp,integer(),n=2,endian="little")
+  print.boat <- readBin(fp,integer(),n=1,endian="little")
   wgl.cov <- read.cov(fp)
   cc<-readBin(fp,integer(),n=1,endian="little")
   wgl.cov.cc<-NULL
   if(cc){
     wgl.cov.cc <- read.cov(fp)
   }
-  list(nMCMC=nMCMC,num.par=num.par,wgl.cov=wgl.cov,cc=cc,wgl.cov.cc=wgl.cov.cc)
+  list(nMCMC=nMCMC,num.par=num.par,print.boat=print.boat,wgl.cov=wgl.cov,cc=cc,wgl.cov.cc=wgl.cov.cc)
 }
 
 #########################################################################################
@@ -291,15 +294,19 @@ read.cov<-function(fp){
   nhaul<-readBin(fp,integer(),n=1,endian="little")
   nxcov<-readBin(fp,integer(),n=1,endian="little")
   ncov<-rep(NA,nxcov)
-  slp.nlev<-slp.fix<-NULL
+  slp.nlev<-slp.fix<-slp.interaction<-slp.in.landings<-NULL
   for(i in 1:nxcov){
     ncov[i]<-readBin(fp,integer(),n=1,endian="little")
     if(i==1){
       int.nlev<-readBin(fp,integer(),n=ncov[i],endian="little")
       int.fix<-readBin(fp,integer(),n=ncov[i],endian="little")
+      int.interaction<-readBin(fp,integer(),n=ncov[i],endian="little")
+      int.in.landings<-readBin(fp,integer(),n=ncov[i],endian="little")
     } else {
       slp.nlev<-readBin(fp,integer(),n=ncov[i],endian="little")
       slp.fix<-readBin(fp,integer(),n=ncov[i],endian="little")
+      slp.interaction<-readBin(fp,integer(),n=ncov[i],endian="little")
+      slp.in.landings<-readBin(fp,integer(),n=ncov[i],endian="little")
     }
   }
   tmp<-readBin(fp,integer(),n=5,endian="little") # internal c-code information (ispat,ihaul,icell,iboat,ihaulsize)
@@ -307,8 +314,9 @@ read.cov<-function(fp){
     ispat<-1
   else
     ispat<-(-1)
-  list(ncat=ncat,nhaul=nhaul,nxcov=nxcov,ncov=ncov,int.nlev=int.nlev,int.fix=int.fix,int.ispat=ispat,
-       slp.nlev=slp.nlev,slp.fix=slp.fix) 
+  list(ncat=ncat,nhaul=nhaul,nxcov=nxcov,ncov=ncov,int.nlev=int.nlev,int.fix=int.fix,
+       int.interaction=int.interaction,int.in.landings=int.in.landings,int.ispat=ispat,
+       slp.nlev=slp.nlev,slp.fix=slp.fix,slp.interaction=slp.interaction,slp.in.landings=slp.in.landings) 
 }
 #########################################################################################
 #' @export

@@ -12,7 +12,7 @@
 //#include "caa_COST.h"
 
 static int make_c_cov(int i_n_cov,int *i_n_lev,int i_ispat,int i_iboat,int i_ihaulsize,int *i_fix,int *i_interaction,
-		      int **i_x_cov,int i_nHaul,Data_cov **o_xcov,int i_fit,int i_incl_haul);
+		      int *i_in_landings,int **i_x_cov,int i_nHaul,Data_cov **o_xcov,int i_fit,int i_incl_haul);
 static int re_make_c_cov(int i_nHaul,Data_cov **o_xcov);
 static int make_spat_struct(int *i_num,int *i_adj_area,Data_cov *x_xcov);
 static int re_make_spat_struct(int *i_num,int *i_adj_area,Data_cov *x_xcov);
@@ -52,7 +52,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
 {
   int         a,i,ind,ncov,err;
   int         ispat,iboat,ihaul,ihaulsize,icell,n_fac_cell,n_ispat,n_iboat;
-  int        *fixed,*interaction,*n_fac;
+  int        *fixed,*interaction,*in_landings,*n_fac;
   Data_cov   *xcov;
   Data_age   *D_age;
 
@@ -79,6 +79,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
   // create new vectors - have different length than original because ncov is larger
   fixed = CALLOC(ncov,int);  // Free ok
   interaction = CALLOC(ncov,int);  // Free ok
+  in_landings = CALLOC(ncov,int);  // Free ok
   n_fac = CALLOC(ncov,int);  // Free ok
   n_fac_cell = 1;
   ispat = -1;
@@ -94,6 +95,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
       fprintf(stderr,"i=%d,nlev=%d,random=%d,interaction=%d,in.landings=%d,CAR=%d,continuous=%d\n",i,i_cov->n_lev[i],i_cov->random[i],i_cov->interaction[i],i_cov->in_landings[i],i_cov->spatial[i],i_cov->continuous[i]);
       #endif
       interaction[i] = i_cov->interaction[i];
+      in_landings[i] = i_cov->in_landings[i];
       if(i_cov->random[i]==1)
 	fixed[ind] = 0;
       else
@@ -115,6 +117,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
     }
   fixed[ncov-1] = 0;
   interaction[ncov-1] = 0;
+  in_landings[ncov-1] = 0;
   n_fac[ncov-1] = D_age->glm->nHaul;
   ihaul = ncov-1;
   if(n_ispat>1)
@@ -133,7 +136,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
   #endif
   
   // Intercept
-  err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,i_cov->c_cov_i,D_age->glm->nHaul,&xcov,i_fit,1);
+  err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,in_landings,i_cov->c_cov_i,D_age->glm->nHaul,&xcov,i_fit,1);
   if(err)
     {
       write_warning("makedata_age1:Error calling make_c_cov\n");
@@ -141,6 +144,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
     }
   D_age->glm->xcov[0] = xcov;
   D_age->glm->xcov[0]->icell = icell;
+  D_age->glm->xcov[0]->iboat = iboat;
   if(i_cov->icell)
     D_age->glm->xcov[0]->n_fac_cell = n_fac_cell;
   D_age->glm->xcov[0]->ihaul = ihaul;
@@ -181,6 +185,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
     }
   
   FREE(interaction);
+  FREE(in_landings);
   FREE(fixed);
   FREE(n_fac);
 
@@ -544,7 +549,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
 {
   int        i,ind,ncov,err;
   int        ispat,iboat,ihaul,icell,ihaulsize,n_fac_cell;
-  int       *fixed,*interaction,*n_fac;
+  int       *fixed,*interaction,*in_landings,*n_fac;
   Data_cov  *xcov;
   Data_lin  *D_lin;
 
@@ -572,6 +577,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
   fixed = CALLOC(ncov,int);  // Free ok
   n_fac = CALLOC(ncov,int);  // Free ok
   interaction = CALLOC(ncov,int); //Free ok  - Must extend the current pointer since haul can be included as covariate
+  in_landings = CALLOC(ncov,int); //Free ok  - Must extend the current pointer since haul can be included as covariate
   n_fac_cell = 1;
   ispat = -1;
   iboat = -1;
@@ -583,6 +589,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
       fprintf(stderr,"i=%d,nlev=%d,random=%d,interaction=%d,in.landings=%d,CAR=%d,continuous=%d\n",i,i_int_cov->n_lev[i],i_int_cov->random[i],i_int_cov->interaction[i],i_int_cov->in_landings[i],i_int_cov->spatial[i],i_int_cov->continuous[i]);
       #endif
       interaction[i] = i_int_cov->interaction[i];
+      in_landings[i] = i_int_cov->in_landings[i];
       if(i_int_cov->random[i] == 1)
 	fixed[ind] = 0;
       else
@@ -600,6 +607,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
     fixed[ncov-1] = 0;
     n_fac[ncov-1] = D_lin->glm->nHaul;
     interaction[ncov-1] = 0;
+    in_landings[ncov-1] = 0;
   }
   ihaul = ncov-1;
   ihaulsize = -1;  // Not included in lga or wgl model
@@ -610,9 +618,9 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
   #endif
 
   if(i_inc_hsz==0)
-    err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,i_int_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,1);
+    err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,in_landings,i_int_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,1);
   else
-    err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,i_int_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,0);
+    err = make_c_cov(ncov,n_fac,ispat,iboat,ihaulsize,fixed,interaction,in_landings,i_int_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,0);
   if(err)
     {
       write_warning("makedata_lin1:Error calling make_c_cov for intercept\n");
@@ -622,10 +630,12 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
   D_lin->glm->xcov[0]->ihaul = ihaul;
   D_lin->glm->xcov[0]->ihaulsize = ihaulsize;
   D_lin->glm->xcov[0]->icell = i_int_cov->icell;
+  D_lin->glm->xcov[0]->iboat = iboat;
   if(i_int_cov->icell)
     D_lin->glm->xcov[0]->n_fac_cell = n_fac_cell;
   FREE(fixed);
   FREE(interaction);
+  FREE(in_landings);
   FREE(n_fac);
   
   /* Convert covariates */
@@ -671,7 +681,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
 	ispat = i;
       n_fac[i] = 1;
     }
-  err = make_c_cov(i_slp_cov->n_cov,n_fac,ispat,iboat,ihaulsize,fixed,i_slp_cov->interaction,i_slp_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,0);
+  err = make_c_cov(i_slp_cov->n_cov,n_fac,ispat,iboat,ihaulsize,fixed,i_slp_cov->interaction,i_slp_cov->in_landings,i_slp_cov->c_cov_i,D_lin->glm->nHaul,&xcov,i_fit,0);
   if(err)
     {
       write_warning("makedata_lin1:Error calling make_c_cov\n");
@@ -1526,7 +1536,7 @@ int re_makedata_wgl_suff_CC(Data_lin *i_D_lin,Data_lin *i_D_lin_CC)
   Memory allocated by this routine is reallocated by ::re_make_c_cov
 */
 static int make_c_cov(int i_n_cov,int *i_n_lev,int i_ispat,int i_iboat,int i_ihaulsize,int *i_fix,int *i_interaction,
-		      int **i_x_cov,int i_nHaul,Data_cov **o_xcov,int i_fit,int i_incl_haul)
+		      int *i_in_landings,int **i_x_cov,int i_nHaul,Data_cov **o_xcov,int i_fit,int i_incl_haul)
 {
   int       f,h,ncol,ind_col;
   Data_cov *xcov;
@@ -1537,6 +1547,7 @@ static int make_c_cov(int i_n_cov,int *i_n_lev,int i_ispat,int i_iboat,int i_iha
   xcov->n_fac = CALLOC(xcov->n_cov,int);  // Free ok
   xcov->fix = CALLOC(xcov->n_cov,int);    // Free ok
   xcov->interaction = CALLOC(xcov->n_cov,int);    // Free ok
+  xcov->in_landings = CALLOC(xcov->n_cov,int);    // Free ok
   /* index for spatial term */
   xcov->ispat = i_ispat;   
   /* index for boat term */
@@ -1547,6 +1558,7 @@ static int make_c_cov(int i_n_cov,int *i_n_lev,int i_ispat,int i_iboat,int i_iha
       xcov->n_fac[f] = i_n_lev[f];
       xcov->fix[f] = i_fix[f];
       xcov->interaction[f] = i_interaction[f];
+      xcov->in_landings[f] = i_in_landings[f];
       //fprintf(stderr,"n_fac[%d]=%d, fix[%d]=%d, interaction[%d]=%d\n",
       //	      f,xcov->n_fac[f],f,xcov->fix[f],f,xcov->interaction[f]);
     }
@@ -1616,6 +1628,7 @@ static int re_make_c_cov(int i_nHaul,Data_cov **o_xcov)
   FREE(xcov->n_fac);
   FREE(xcov->fix);
   FREE(xcov->interaction);
+  FREE(xcov->in_landings);
 
   for(h=0;h<i_nHaul;h++)
     FREE(xcov->c_cov[h]);
@@ -1855,7 +1868,7 @@ int re_makedata_mcmc(TC_struct **o_totcatch)
 int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data_lin *i_D_hsz,
 		      Input_totcatch *i_inCatch,int i_inc_hsz,Data_totcatch **o_D_totcatch)
 {
-  int        err,c,i,ncov;
+  int        err,c,i,ind,ncov;
   Data_totcatch  *D_totcatch;
  
   D_totcatch = CALLOC(1,Data_totcatch);        // Free ok
@@ -1866,73 +1879,113 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
 
   ncov = 1;
   // Factors for hauleffect is not part of fac_age_int anymore
-  D_totcatch->fac_age = Mmatrix_2d(0,ncov-1,0,i_D_age->glm->xcov[0]->n_cov-2,sizeof(int),1);    // Free ok
-
+  D_totcatch->fac_age = Mmatrix_2d(0,ncov-1,0,i_D_age->glm->xcov[0]->n_cov-1,sizeof(int),1);    // Free ok
   #ifdef DEBUG_PREDICT
   printf("Factors corresponding to age int model\n");
   #endif
   /* Factors corresponding to age int model */
+  ind = 0;
   for(i=0;i<(i_D_age->glm->xcov[0]->n_cov-1);i++)
     {
-      D_totcatch->fac_age[0][i] = i_inCatch->fac_age_int[i]-1; /* Assume start on zero */
-      //fprintf(stderr,"fac_age[0][%d]=%d\n",i,D_totcatch->fac_age[0][i]);
+      if(i_D_age->glm->xcov[0]->in_landings[i]==1)
+	D_totcatch->fac_age[0][i] = i_inCatch->fac_age_int[ind]-1; /* Assume start on zero */
+      else
+	D_totcatch->fac_age[0][i] = -1;
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"fac_age[0][%d]=%d\n",i,D_totcatch->fac_age[0][i]);
+      #endif
+      ind++;
     }
     
   if(i_inc_hsz)
     {
       D_totcatch->fac_hsz = Mmatrix_2d(0,ncov-1,0,i_D_hsz->glm->xcov[0]->n_cov-1,sizeof(int),1);    // Free ok
       /* Factors corresponding to hsz int model */
+      ind = 0;
       for(i=0;i<(i_D_hsz->glm->xcov[0]->n_cov-1);i++)
 	{
-	  D_totcatch->fac_hsz[0][i] = i_inCatch->fac_hsz_int[i]-1; /* Assume start on zero */
-	  //fprintf(stderr,"fac_hsz[0][%d]=%d\n",i,D_totcatch->fac_hsz[0][i]);
+	  if(i_D_age->glm->xcov[0]->in_landings[i]==1)
+	    D_totcatch->fac_hsz[0][i] = i_inCatch->fac_hsz_int[ind]-1; /* Assume start on zero */
+	  else
+	    D_totcatch->fac_hsz[0][i] = -1;
+          #ifdef DEBUG_PREDICT
+	  fprintf(stderr,"fac_hsz[0][%d]=%d\n",i,D_totcatch->fac_hsz[0][i]);
+	  #endif
+	  ind++;
 	}
     }
 
   ncov = 2;
-  D_totcatch->fac_lga = Mmatrix_2d(0,ncov-1,0,i_D_lga->glm->xcov[0]->n_cov-2,sizeof(int),1);  // Free ok
+  D_totcatch->fac_lga = Mmatrix_2d(0,ncov-1,0,i_D_lga->glm->xcov[0]->n_cov-1,sizeof(int),1);  // Free ok
 
   #ifdef DEBUG_PREDICT
   printf("Factors corresponding to lga intercept model\n");
   #endif
   /* Factors corresponding to lga intercept model */
+  ind = 0;
   for(i=0;i<(i_D_lga->glm->xcov[0]->n_cov-1);i++)
     {
-      D_totcatch->fac_lga[0][i] = i_inCatch->fac_lga_int[i]-1;  /* Assume start on zero */
-      //fprintf(stderr,"fac_lga[0][%d]=%d\n",i,D_totcatch->fac_lga[0][i]);
+      if(i_D_lga->glm->xcov[0]->in_landings[i]==1)
+	D_totcatch->fac_lga[0][i] = i_inCatch->fac_lga_int[ind]-1;  /* Assume start on zero */
+      else
+	D_totcatch->fac_lga[0][i] = -1;
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"fac_lga[0][%d]=%d\n",i,D_totcatch->fac_lga[0][i]);
+      #endif
+      ind++;
     }
 
   #ifdef DEBUG_PREDICT
   printf("Factors corresponding to lga slope model\n");
   #endif
   /* Factors corresponding to lga slope model */
+  ind = 0;
   for(i=0;i<i_D_lga->glm->xcov[1]->n_cov;i++)
     {
-      D_totcatch->fac_lga[1][i] = i_inCatch->fac_lga_slp[i]-1; /* Assume start on zero */
-      //fprintf(stderr,"fac_lga[1][%d]=%d\n",i,D_totcatch->fac_lga[1][i]);
+      if(i_D_lga->glm->xcov[1]->in_landings[i]==1)
+	D_totcatch->fac_lga[1][i] = i_inCatch->fac_lga_slp[ind]-1; /* Assume start on zero */
+      else 
+	D_totcatch->fac_lga[1][i] = -1;
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"fac_lga[1][%d]=%d\n",i,D_totcatch->fac_lga[1][i]);
+      #endif
+      ind++;
     }
 
   ncov = 2;
-  D_totcatch->fac_wgl = Mmatrix_2d(0,ncov-1,0,i_D_wgl->glm->xcov[0]->n_cov-2,sizeof(int),1);  // Free ok
+  D_totcatch->fac_wgl = Mmatrix_2d(0,ncov-1,0,i_D_wgl->glm->xcov[0]->n_cov-1,sizeof(int),1);  // Free ok
 
   #ifdef DEBUG_PREDICT
   printf("Factors corresponding to wgl intercept model\n");
   #endif
   /* Factors corresponding to wgl intercept model */
+  ind = 0;
   for(i=0;i<(i_D_wgl->glm->xcov[0]->n_cov-1);i++) 
     {
-      D_totcatch->fac_wgl[0][i] = i_inCatch->fac_wgl_int[i]-1; /* Assume start on zero */
-      //fprintf(stderr,"fac_wgl[0][%d]=%d\n",i,D_totcatch->fac_wgl[0][i]);
+      if(i_D_wgl->glm->xcov[0]->in_landings[i]==1)
+	D_totcatch->fac_wgl[0][i] = i_inCatch->fac_wgl_int[ind]-1; /* Assume start on zero */
+      else
+	D_totcatch->fac_wgl[0][i] = -1;
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"fac_wgl[0][%d]=%d\n",i,D_totcatch->fac_wgl[0][i]);
+      #endif
+      ind++;
     }
 
   #ifdef DEBUG_PREDICT
   printf("Factors corresponding to wgl slope model\n");
   #endif
   /* Factors corresponding to wgl slope model */
+  ind = 0;
   for(i=0;i<i_D_wgl->glm->xcov[1]->n_cov;i++)
     {
-      D_totcatch->fac_wgl[1][i] = i_inCatch->fac_wgl_slp[i]-1; /* Assume start on zero */
-      //fprintf(stderr,"fac_wgl[1][%d]=%d\n",i,D_totcatch->fac_wgl[1][i]);
+      if(i_D_wgl->glm->xcov[1]->in_landings[i]==1)
+	D_totcatch->fac_wgl[1][i] = i_inCatch->fac_wgl_slp[ind]-1; /* Assume start on zero */
+      else
+	D_totcatch->fac_wgl[1][i] = -1;
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"fac_wgl[1][%d]=%d\n",i,D_totcatch->fac_wgl[1][i]);
+      #endif
     }
 
   #ifdef DEBUG_PREDICT
@@ -2172,21 +2225,30 @@ static int convert_tot_cov(Data_totcatch *i_D_totcatch,int *i_fac,Data_cov *i_xc
 			     0,i_xcov->n_cov-1,sizeof(int),1);
   for(j=0;j<(i_xcov->n_cov-i_neff);j++)
     {
-      //fprintf(g_caa_log,"j=%d, ncov=%d, i_neff=%d, icell=%d,ncell=%d,ifac=%d,ihaul=%d\n",j,i_xcov->n_cov,i_neff,i_xcov->icell,i_D_totcatch->nCell,i_fac[j],i_xcov->ihaul);
+      #ifdef DEBUG_PREDICT
+      fprintf(stderr,"j=%d, ncov=%d, i_neff=%d, icell=%d,ncell=%d,ifac=%d,ihaul=%d\n",j,i_xcov->n_cov,i_neff,i_xcov->icell,i_D_totcatch->nCell,i_fac[j],i_xcov->ihaul);
+      #endif
       if(j!=i_xcov->icell)
 	{
 	  for(c=0;c<i_D_totcatch->nCell;c++)
 	    {
-	      k = 0;
-	      while(k<(i_xcov->n_fac[j]-1) && i_D_totcatch->factors[c][i_fac[j]]!=k)
-		k++;
-	      if(i_D_totcatch->factors[c][i_fac[j]]==k)
+	      if(i_fac[j]==-1)
 		{
-		  o_xcov->c_cov[c][j] = k;
+		  o_xcov->c_cov[c][j] = -1;
 		}
 	      else
 		{
-		  o_xcov->c_cov[c][j] = -1;
+		  k = 0;
+		  while(k<(i_xcov->n_fac[j]-1) && i_D_totcatch->factors[c][i_fac[j]]!=k)
+		    k++;
+		  if(i_D_totcatch->factors[c][i_fac[j]]==k)
+		    {
+		      o_xcov->c_cov[c][j] = k;
+		    }
+		  else
+		    {
+		      o_xcov->c_cov[c][j] = -1;
+		    }
 		}
 	    }
 	}

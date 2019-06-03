@@ -737,7 +737,7 @@ int main_model2(Input_common *i_inCommon, Input_wgl *i_inWgl,
   if(!(g_caa_mcmc2))
     printError("main_model2: Couldn't open file for writing",i_inCommon->filename_mcmc2);
   err = write_mcmc2(D_wgl, weight, D_wgl_CC, weight_CC, i_inCommon->num_it_outer, 
-		    i_inCommon->num_par2, i_D_orig->coastal_cod, i_inCommon->print_format);
+		    i_inCommon->num_par2, i_D_orig->coastal_cod, i_inCommon->print_boat, i_inCommon->print_format);
   if(err)
     {
       write_warning("main_model2:Error calling write_mcmc2\n");

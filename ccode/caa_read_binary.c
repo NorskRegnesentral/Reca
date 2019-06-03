@@ -2485,6 +2485,8 @@ int add_object_info_age_lga(Input_common *i_inCommon, Data_orig *i_D_orig, Input
       i_inHsz->slp_cov->continuous[0] = 0;
       i_inHsz->slp_cov->interaction = CALLOC(n_cov,int);
       i_inHsz->slp_cov->interaction[0] = 0;
+      i_inHsz->slp_cov->in_landings = CALLOC(n_cov,int);
+      i_inHsz->slp_cov->in_landings[0] = 1;
       i_inHsz->slp_cov->c_cov_i = CALLOC(1,int *);
       i_inHsz->slp_cov->c_cov_i[0] = CALLOC(n_cov*i_D_orig->nHaul,int);
       for(i=0;i<(n_cov*i_D_orig->nHaul);i++)
@@ -2505,6 +2507,8 @@ int add_object_info_age_lga(Input_common *i_inCommon, Data_orig *i_D_orig, Input
   i_inLga->slp_cov->continuous[0] = 0;
   i_inLga->slp_cov->interaction = CALLOC(n_cov,int);
   i_inLga->slp_cov->interaction[0] = 0;
+  i_inLga->slp_cov->in_landings = CALLOC(n_cov,int);
+  i_inLga->slp_cov->in_landings[0] = 1;
   i_inLga->slp_cov->c_cov_i = CALLOC(1,int *);
   i_inLga->slp_cov->c_cov_i[0] = CALLOC(n_cov*i_D_orig->nHaul,int);
   for(i=0;i<(n_cov*i_D_orig->nHaul);i++)
@@ -2558,6 +2562,8 @@ int add_object_info_wgl(Input_common *i_inCommon, Data_orig *i_D_orig, Input_wgl
   i_inWgl->slp_cov->continuous[0] = 0;
   i_inWgl->slp_cov->interaction = CALLOC(n_cov,int);
   i_inWgl->slp_cov->interaction[0] = 0;
+  i_inWgl->slp_cov->in_landings = CALLOC(n_cov,int);
+  i_inWgl->slp_cov->in_landings[0] = 1;
   i_inWgl->slp_cov->c_cov_i = CALLOC(1,int *);
   i_inWgl->slp_cov->c_cov_i[0] = CALLOC(n_cov*i_D_orig->nHaul,int);
   for(i=0;i<(n_cov*i_D_orig->nHaul);i++)

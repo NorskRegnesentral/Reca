@@ -146,6 +146,8 @@ typedef struct
   int       *fix; 
   /*! \brief =1 if factor is an interaction effect (i.e. part of cell effect), 0 otherwise */
   int       *interaction; 
+  /*! \brief =1 if factor exists in landings data (i.e. not boat effect), 0 otherwise */
+  int       *in_landings; 
   /*! \brief Index indicating which factor has spatial structure */
   int        ispat;
   /*! \brief Index indicating which factor has haul structure */

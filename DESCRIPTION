@@ -1,7 +1,7 @@
 Title: Reca
 Maintainer: Hanne Rognebakke <hanne.rognebakke@nr.no>
 Package: Reca
-Version: 1.1
+Version: 1.2
 Author: Hanne Rognebakke, David Hirst, Sondre Aanes and Geir Storvik
 Depends:
     R (>= 2.4.0),MASS

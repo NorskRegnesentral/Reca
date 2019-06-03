@@ -398,7 +398,9 @@ int read_par_model1(char *i_filename, Data_age *i_D_age, Age_struct *i_age,
     
   /* g-function */
   if(i_D_g_a->g_a_model==1)
-    ret = fread(i_D_g_a->g_a_par,sizeof(double),i_D_g_a->g_a_npar,fp);
+    {
+      ret = fread(i_D_g_a->g_a_par,sizeof(double),i_D_g_a->g_a_npar,fp);
+    }
 
   /* Coastal cod */  
   if(i_coastal_cod)
@@ -411,7 +413,9 @@ int read_par_model1(char *i_filename, Data_age *i_D_age, Age_struct *i_age,
 	}
       /* g-function */
       if(i_D_g_a_CC->g_a_model==1)
-	ret = fread(i_D_g_a_CC->g_a_par,sizeof(double),i_D_g_a_CC->g_a_npar,fp);
+	{
+	  ret = fread(i_D_g_a_CC->g_a_par,sizeof(double),i_D_g_a_CC->g_a_npar,fp);
+	}
       /* Classification error */
       ret = fread(&i_D_CC->k1,sizeof(int),1,fp);
       ret = fread(&i_D_CC->k2,sizeof(int),1,fp);
@@ -845,6 +849,8 @@ int write_glm_object(FILE *fp, Data_glm *i_glm, int i_print_format)
 	  fwrite(&i_glm->xcov[i]->n_cov,sizeof(int),1,fp);
 	  fwrite(i_glm->xcov[i]->n_fac,sizeof(int),i_glm->xcov[i]->n_cov,fp);
 	  fwrite(i_glm->xcov[i]->fix,sizeof(int),i_glm->xcov[i]->n_cov,fp);
+	  fwrite(i_glm->xcov[i]->interaction,sizeof(int),i_glm->xcov[i]->n_cov,fp);
+	  fwrite(i_glm->xcov[i]->in_landings,sizeof(int),i_glm->xcov[i]->n_cov,fp);
 	}
       fwrite(&i_glm->xcov[0]->ispat,sizeof(int),1,fp);
       fwrite(&i_glm->xcov[0]->ihaul,sizeof(int),1,fp);
@@ -868,6 +874,16 @@ int write_glm_object(FILE *fp, Data_glm *i_glm, int i_print_format)
 	  for(j=0;j<i_glm->xcov[i]->n_cov;j++)
 	    {
 	      fprintf(fp,"%d ",i_glm->xcov[i]->fix[j]);
+	    }
+	  fprintf(fp,"\n");
+	  for(j=0;j<i_glm->xcov[i]->n_cov;j++)
+	    {
+	      fprintf(fp,"%d ",i_glm->xcov[i]->interaction[j]);
+	    }
+	  fprintf(fp,"\n");
+	  for(j=0;j<i_glm->xcov[i]->n_cov;j++)
+	    {
+	      fprintf(fp,"%d ",i_glm->xcov[i]->in_landings[j]);
 	    }
 	  fprintf(fp,"\n");
 	}
@@ -915,9 +931,13 @@ int read_glm_object(FILE *fp, Data_glm **o_glm)
       xcov = CALLOC(1,Data_cov); 
       ret = fread(&xcov->n_cov,sizeof(int),1,fp);
       xcov->n_fac = CALLOC(xcov->n_cov,int); 
-      xcov->fix = CALLOC(xcov->n_cov,int);   
+      xcov->fix = CALLOC(xcov->n_cov,int);
+      xcov->interaction = CALLOC(xcov->n_cov,int);
+      xcov->in_landings = CALLOC(xcov->n_cov,int);
       ret = fread(xcov->n_fac,sizeof(int),xcov->n_cov,fp);
       ret = fread(xcov->fix,sizeof(int),xcov->n_cov,fp);
+      ret = fread(xcov->interaction,sizeof(int),xcov->n_cov,fp);
+      ret = fread(xcov->in_landings,sizeof(int),xcov->n_cov,fp);
       glm->xcov[i] = xcov;
       #ifdef DEBUG_PREDICT
       fprintf(stderr,"n_cov=%d\n",xcov->n_cov);
@@ -958,6 +978,7 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
 	       Data_lin **o_D_lga_CC, Data_g_a **o_D_g_a_CC)
 {
   int        i,ret,g_a_model,g_a_nSeason,g_a_ncat;
+  double    *par_init;
   Data_age  *D_age;
   Data_lin  *D_lga;
   Data_g_a  *D_g_a;
@@ -975,6 +996,7 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
   /* Read common parameters */
   ret = fread(&i_inPredict->nMCMC,sizeof(int),1,g_caa_mcmc1);
   ret = fread(i_inPredict->num_par1,sizeof(int),5,g_caa_mcmc1);
+  ret = fread(&i_inPredict->read_boat,sizeof(int),1,g_caa_mcmc1);
   if(i_inPredict->num_par1[3]>0)
     i_inPredict->coastal_cod = 1;
   else
@@ -985,9 +1007,6 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
   for(i=0;i<5;i++)
     fprintf(stderr," %d",i_inPredict->num_par1[i]);
   fprintf(stderr,"\ncoastal cod=%d\n",i_inPredict->coastal_cod);
-  #endif
-  ret = fread(&i_inPredict->read_boat,sizeof(int),1,g_caa_mcmc1);
-  #ifdef DEBUG_PREDICT
   fprintf(stderr,"read_boat=%d\n",i_inPredict->read_boat);
   #endif
 	  
@@ -1012,7 +1031,13 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
   #ifdef DEBUG_PREDICT
   fprintf(stderr,"ga_model=%d\n",g_a_model);
   #endif
-  g_a_nSeason = 12;  //Use 12 seasons for continuous age - Not actually needed in prediction
+  if(g_a_model==1)
+    {
+      par_init = CALLOC(3,double); // Only for not getting seg.fault. Not used in prediction.
+      for(i=0;i<3;i++)
+	par_init[i] = 0.0;
+    }
+  g_a_nSeason = 12;  //Use 12 seasons for continuous age - Not needed in prediction
   g_a_ncat = D_age->glm->ncat*g_a_nSeason;
 
    /* Read coastal cod parameters */
@@ -1021,7 +1046,7 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
   fprintf(stderr,"coastal cod=%d\n",i_inPredict->coastal_cod);
   #endif
   ret = makedata_g_a(D_age->glm->ncat,g_a_ncat,g_a_nSeason,D_age->a_vec,i_inPredict->coastal_cod,
-		     g_a_model, NULL, 0, 0, 0, &D_g_a);
+		     g_a_model, par_init, 0, 0, 0, &D_g_a);
   if(i_inPredict->coastal_cod)
     {
       D_lga_CC = CALLOC(1,Data_lin);      
@@ -1035,9 +1060,11 @@ int read_mcmc1(Input_predict *i_inPredict, Data_age **o_D_age, Data_lin **o_D_lg
       D_lga_CC->glm->xcov[1]->ihaulsize = -1;
       ret = fread(&g_a_model,sizeof(int),1,g_caa_mcmc1);
       ret = makedata_g_a(D_age->glm->ncat,g_a_ncat,g_a_nSeason,D_age->a_vec,i_inPredict->coastal_cod,
-			 g_a_model, NULL, 0, 0, 0, &D_g_a_CC);
+			 g_a_model, par_init, 0, 0, 0, &D_g_a_CC);
     }
 
+  if(g_a_model==1)
+    FREE(par_init);
   *o_D_age = D_age;
   *o_D_lga = D_lga;
   *o_D_g_a = D_g_a;
@@ -1069,11 +1096,18 @@ int read_mcmc2(Input_predict *i_inPredict, Data_lin **o_D_wgl, Data_lin **o_D_wg
   ret = fread(&itmp,sizeof(int),1,g_caa_mcmc2);
   if(itmp != i_inPredict->nMCMC)
     {
-      sprintf(buffer,"read_mcmc2: Number of MCMC samples don't match in the two files\n");
+      sprintf(buffer,"read_mcmc2: Number of MCMC samples doesn't match in the two files\n");
       write_warning(buffer);
       return(1);
     }
   ret = fread(i_inPredict->num_par2,sizeof(int),2,g_caa_mcmc2);
+  ret = fread(&itmp,sizeof(int),1,g_caa_mcmc2);
+  if(itmp!=i_inPredict->read_boat)
+    {
+      sprintf(buffer,"read_mcmc2: read_boat variable doesn't match in the two files\n");
+      write_warning(buffer);
+      return(1);
+    }
   #ifdef DEBUG_PREDICT
   fprintf(stderr,"npar_wgl=%d %d\n",i_inPredict->num_par2[0],i_inPredict->num_par2[1]);
   #endif
@@ -1158,13 +1192,14 @@ int read_hsz(Input_predict *i_inPredict, Data_lin **o_D_wgl)
 */
 int write_mcmc2(Data_lin *i_D_wgl, LW_struct *i_weight, 
 		Data_lin *i_D_wgl_CC, LW_struct *i_weight_CC,
-		int i_nMCMC, int *i_num_par2, int i_coastal_cod, int i_print_format)
+		int i_nMCMC, int *i_num_par2, int i_coastal_cod, int i_print_boat, int i_print_format)
 {
   if(i_print_format==0) // Binary format
     {
       /* Write common parameters */    
       fwrite(&i_nMCMC,sizeof(int),1,g_caa_mcmc2);
       fwrite(i_num_par2,sizeof(int),2,g_caa_mcmc2);
+      fwrite(&i_print_boat,sizeof(int),1,g_caa_mcmc2);
 
       /* Write wgl model */
       write_glm_object(g_caa_mcmc2, i_D_wgl->glm, i_print_format);
@@ -1179,6 +1214,7 @@ int write_mcmc2(Data_lin *i_D_wgl, LW_struct *i_weight,
       /* Write common parameters */    
       fprintf(g_caa_mcmc2,"%d\n",i_nMCMC);
       fprintf(g_caa_mcmc2,"%d %d\n",i_num_par2[0],i_num_par2[1]);
+      fprintf(g_caa_mcmc2,"%d\n",i_print_boat);
       /* Write wgl model */
       write_glm_object(g_caa_mcmc2, i_D_wgl->glm, i_print_format);
       /* Write coastal cod parameters */
