@@ -32,7 +32,7 @@ int read_mcmc2(Input_predict *i_inPredict, Data_lin **o_D_wgl, Data_lin **o_D_wg
 int read_hsz(Input_predict *i_inPredict,  Data_lin **o_D_wgl);
 int write_mcmc2(Data_lin *i_D_wgl, LW_struct *i_weight, 
 		Data_lin *i_D_wgl_CC, LW_struct *i_weight_CC,
-		int i_nMCMC, int *i_num_par2, int i_coastal_cod, int i_print_boat);
+		int i_nMCMC, int *i_num_par2, int i_coastal_cod, int i_print_boat, int i_print_format);
 int write_LW_struct(LW_struct *i_lin, Data_glm *i_glm, char *i_filename);
 int write_Data_lin(Data_lin *i_D_lga, int i_ncat, char *i_filename);
 int read_par_ascii_lga(FILE *fp,Data_glm *i_glm,Eff_str *i_par);

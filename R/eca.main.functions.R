@@ -68,7 +68,9 @@
 #'  as "non-linear" in which case the Schnute-Richards model will be used
 #'  \item CC - TRUE if coastal cod is included in the model, FALSE otherwise
 #'  \item CCerror - TRUE if classification error is included in coastal cod model, FALSE otherwise
-#'  \item seed - random seed value
+#'  \item seed - random seed value that initializes the random number generator. If NULL, a random number is generated for 
+#'  this value. Otherwise, if the same seed is used and the other input values are the same, the results will be the same in 
+#'  different simulations.
 #'  }
 #' @return A list with elements
 #' \item{ProportionAtAge: }{a list with \strong{Intercept} and \strong{LogLikelihood} for the age model 
@@ -116,6 +118,9 @@ eca.estimate <- function(AgeLength,WeightLength,Landings,GlobalParameters)
   stoxdata<-list(AgeLength=AgeLength,WeightLength=WeightLength,
                  Landings=Landings,GlobalParameters=GlobalParameters)
 
+  if(is.null(GlobalParameters$seed)){
+    GlobalParameters$seed <- sample(1:9999,1) #Generate a positive number
+  }
   if(is.null(GlobalParameters$delta.age)){
     GlobalParameters$delta.age <- 0.001
   }
@@ -167,7 +172,9 @@ eca.estimate <- function(AgeLength,WeightLength,Landings,GlobalParameters)
                lgamodel=GlobalParameters$lgamodel,
                delta.age=GlobalParameters$delta.age,
                sim.ar=T,usedebug=F,print.boat=T,
-               save.age=F,save.lga=F,save.wgl=F,inc.haulsize=F)
+               save.age=F,save.lga=F,save.wgl=F,inc.haulsize=F,
+               print.format=GlobalParameters$print.format,
+               old.version=GlobalParameters$old.version)
 
   run.fit(stoxdata,common,win)
   stoxdata<<-stoxdata

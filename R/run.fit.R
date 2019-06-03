@@ -47,9 +47,15 @@ run.fit <- function(stoxdata,common,win)
                    m.i.n=m.i.n,
                    inc.haulsize=as.integer(inc.cts.var))
 
-  common.par$print.format <- as.integer(0)  #print.format =0 (binary), 1 (ascii - only for testing)
-  common.par$old.version <- as.integer(0) #only for testing!!
-   
+  if(is.null(common$print.format))
+    common.par$print.format <- as.integer(0)  #print.format =0 (binary), 1 (ascii - only for testing)
+  else
+    common.par$print.format <- as.integer(common$print.format)
+  if(is.null(common$old.version))
+    common.par$old.version <- as.integer(0) # only for testing!!
+  else
+    common.par$old.version <- as.integer(common$old.version)     
+  
   priorList<<-priorList
   common.par<<-common.par
   ageList<<-ageList
