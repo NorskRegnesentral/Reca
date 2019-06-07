@@ -6,6 +6,8 @@
 #' @export   
 ## Created 
 make.ageList<-function(data,common){
+  if(any(data$DataMatrix$part.year<=0 | data$DataMatrix$part.year>1))
+    stop("Error: part.year must be >0 and <=1")
   a.vec<-common$minage:common$maxage
   nAges<-length(a.vec)
   if(common$cc)a.vec<-c(a.vec,a.vec)
@@ -33,13 +35,11 @@ make.ageList<-function(data,common){
   }
   if(any(!is.finite(data$CovariateMatrix$haulcount)))
     stop("Error: Missing values in haulcount is not allowed")
-  if(common$CCerror){
+  if(common$CC){
     ind <- data$DataMatrix$otolithtype%in%c(1,2,4,5,NA)
     if(any(ind==FALSE))
-       stop("Error: Otolithtype different from 1, 2, 4 or 5 is not allowed when running with CCerror")
+       stop("Error: Otolithtype different from 1, 2, 4 or 5 is not allowed when running coastal cod model")
   }
-  if(any(!is.finite(data$CovariateMatrix$haulcount)))
-    stop("Error: Missing values in haulcount is not allowed")
   list(sortmat=sortmat,cell=cell,delta.age=as.numeric(common$delta.age),
        a.vec=a.vec,A2A=A2A,
        age.errors=as.integer(common$age.error),

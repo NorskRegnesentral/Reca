@@ -10,8 +10,8 @@ make.data.catch<-function(stoxdata,pc.age,pc.wgl){
   wglcov<-stoxdata$Landings$WeightLengthCov[,wglvars,drop=FALSE]
   fac.lga.slp<-(1:(dim(agecov)[2]))[stoxdata$AgeLength$info[,"in.slopeModel"]==1]
   fac.wgl.slp<-(1:(dim(wglcov)[2]))[stoxdata$WeightLength$info[,"in.slopeModel"]==1]
-  if(agecell)agecov<-cbind(agecov,agecell=pc.age$predict.cell)
-  if(wglcell)wglcov<-cbind(wglcov,wglcell=pc.wgl$predict.cell)
+  if(agecell)agecov<-cbind(agecov,agecell=pc.age$predict.cell) # NB! agecell must be the last column
+  if(wglcell)wglcov<-cbind(wglcov,wglcell=pc.wgl$predict.cell) # NB! wglcell must be the last column
   nagevar<-dim(agecov)[2]
   nwglvar<-dim(wglcov)[2]
   factors<-cbind(agecov,wglcov)

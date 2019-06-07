@@ -9,7 +9,8 @@
 #' AgeLength
 #' \itemize{
 #'  \item DataMatrix  - matrix with one row for each fish and columns \emph{age} (age in whole years), \emph{part.year} 
-#'  (fraction of year, i.e. realage=age+part.year), \emph{lengthCM} (length in centimeters), \emph{samplingID} (id for 
+#'  (fraction of year, >0 and <=1, i.e. realage=age+part.year, e.g. for seasonal sampling part.year=0.25 for season 1 etc, 
+#'  for daily sampling part.year=1/365 for day 1 etc), \emph{lengthCM} (length in centimeters), \emph{samplingID} (id for 
 #'  sampling unit, e.g. haul number, numbered from 1 to number of sampling units), \emph{partnumber}, \emph{partcount}, 
 #'  \emph{otolithtype} (classification when multiple stocks (type1 (Coastal cod) and type2 (Atlantic cod)): 
 #'  1-certain type1, 2-uncertain type1, 4-uncertain type2, 5-certain type2).

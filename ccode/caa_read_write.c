@@ -899,7 +899,8 @@ int write_glm_object(FILE *fp, Data_glm *i_glm, int i_print_format)
     {
       fprintf(g_caa_log,"n_cov=%d\n",i_glm->xcov[i]->n_cov);
       for(j=0;j<i_glm->xcov[i]->n_cov;j++)
-	fprintf(g_caa_log,"fac[%d]=%d,fix[%d]=%d\n",j,i_glm->xcov[i]->n_fac[j],j,i_glm->xcov[i]->fix[j]);
+	fprintf(g_caa_log,"fac[%d]=%d,fix[%d]=%d,interaction[%d]=%d,in.landings[%d]=%d\n",
+		j,i_glm->xcov[i]->n_fac[j],j,i_glm->xcov[i]->fix[j],j,i_glm->xcov[i]->interaction[j],j,i_glm->xcov[i]->in_landings[j]);
     }
   #endif
   

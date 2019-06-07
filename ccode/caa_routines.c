@@ -1868,7 +1868,7 @@ int re_makedata_mcmc(TC_struct **o_totcatch)
 int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data_lin *i_D_hsz,
 		      Input_totcatch *i_inCatch,int i_inc_hsz,Data_totcatch **o_D_totcatch)
 {
-  int        err,c,i,ind,ncov;
+  int        err,c,i,ii,ind,ncov;
   Data_totcatch  *D_totcatch;
  
   D_totcatch = CALLOC(1,Data_totcatch);        // Free ok
@@ -1888,14 +1888,21 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
   for(i=0;i<(i_D_age->glm->xcov[0]->n_cov-1);i++)
     {
       if(i_D_age->glm->xcov[0]->in_landings[i]==1)
-	D_totcatch->fac_age[0][i] = i_inCatch->fac_age_int[ind]-1; /* Assume start on zero */
+	{
+	  D_totcatch->fac_age[0][i] = i_inCatch->fac_age_int[ind]-1; /* Assume start on zero */
+	  ind++;
+	}
       else
 	D_totcatch->fac_age[0][i] = -1;
-      #ifdef DEBUG_PREDICT
-      fprintf(stderr,"fac_age[0][%d]=%d\n",i,D_totcatch->fac_age[0][i]);
-      #endif
-      ind++;
     }
+  if(i_D_age->glm->xcov[0]->icell>0) /* The factor for cell effects is added as the last column */
+    {
+      D_totcatch->fac_age[0][i_D_age->glm->xcov[0]->icell] = i_inCatch->fac_age_int[ind]-1;
+    }
+  #ifdef DEBUG_PREDICT
+  for(i=0;i<(i_D_age->glm->xcov[0]->n_cov-1);i++)
+    fprintf(stderr,"fac_age[0][%d]=%d\n",i,D_totcatch->fac_age[0][i]);
+  #endif
     
   if(i_inc_hsz)
     {
@@ -1905,14 +1912,21 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
       for(i=0;i<(i_D_hsz->glm->xcov[0]->n_cov-1);i++)
 	{
 	  if(i_D_age->glm->xcov[0]->in_landings[i]==1)
-	    D_totcatch->fac_hsz[0][i] = i_inCatch->fac_hsz_int[ind]-1; /* Assume start on zero */
+	    {
+	      D_totcatch->fac_hsz[0][i] = i_inCatch->fac_hsz_int[ind]-1; /* Assume start on zero */
+	      ind++;
+	    }
 	  else
 	    D_totcatch->fac_hsz[0][i] = -1;
-          #ifdef DEBUG_PREDICT
-	  fprintf(stderr,"fac_hsz[0][%d]=%d\n",i,D_totcatch->fac_hsz[0][i]);
-	  #endif
-	  ind++;
 	}
+      if(i_D_hsz->glm->xcov[0]->icell>0)
+	{
+	  D_totcatch->fac_hsz[0][i_D_hsz->glm->xcov[0]->icell] = i_inCatch->fac_hsz_int[ind]-1;
+    	}
+      #ifdef DEBUG_PREDICT
+      for(i=0;i<(i_D_hsz->glm->xcov[0]->n_cov-1);i++)
+	fprintf(stderr,"fac_hsz[0][%d]=%d\n",i,D_totcatch->fac_hsz[0][i]);
+      #endif
     }
 
   ncov = 2;
@@ -1923,16 +1937,19 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
   #endif
   /* Factors corresponding to lga intercept model */
   ind = 0;
-  for(i=0;i<(i_D_lga->glm->xcov[0]->n_cov-1);i++)
+  for(i=0;i<i_D_lga->glm->xcov[0]->n_cov;i++)
     {
       if(i_D_lga->glm->xcov[0]->in_landings[i]==1)
-	D_totcatch->fac_lga[0][i] = i_inCatch->fac_lga_int[ind]-1;  /* Assume start on zero */
+	{
+	  D_totcatch->fac_lga[0][i] = i_inCatch->fac_lga_int[ind]-1;  /* Assume start on zero */
+	  ind++;
+	}
       else
 	D_totcatch->fac_lga[0][i] = -1;
-      #ifdef DEBUG_PREDICT
-      fprintf(stderr,"fac_lga[0][%d]=%d\n",i,D_totcatch->fac_lga[0][i]);
-      #endif
-      ind++;
+    }
+  if(i_D_lga->glm->xcov[0]->icell>0)
+    {
+      D_totcatch->fac_lga[0][i_D_lga->glm->xcov[0]->icell] = i_inCatch->fac_lga_int[ind]-1;
     }
 
   #ifdef DEBUG_PREDICT
@@ -1943,14 +1960,24 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
   for(i=0;i<i_D_lga->glm->xcov[1]->n_cov;i++)
     {
       if(i_D_lga->glm->xcov[1]->in_landings[i]==1)
-	D_totcatch->fac_lga[1][i] = i_inCatch->fac_lga_slp[ind]-1; /* Assume start on zero */
+	{
+	  D_totcatch->fac_lga[1][i] = i_inCatch->fac_lga_slp[ind]-1; /* Assume start on zero */
+	  ind++;
+	}
       else 
 	D_totcatch->fac_lga[1][i] = -1;
-      #ifdef DEBUG_PREDICT
-      fprintf(stderr,"fac_lga[1][%d]=%d\n",i,D_totcatch->fac_lga[1][i]);
-      #endif
-      ind++;
     }
+  if(i_D_lga->glm->xcov[1]->icell>0)
+    {
+      D_totcatch->fac_lga[1][i_D_lga->glm->xcov[0]->icell] = i_inCatch->fac_lga_int[ind]-1;
+    }
+  #ifdef DEBUG_PREDICT
+  for(ii=0;ii<i_D_lga->glm->nxcov;ii++)
+    {
+      for(i=0;i<i_D_lga->glm->xcov[ii]->n_cov;i++)
+	fprintf(stderr,"fac_lga[%d][%d]=%d\n",ii,i,D_totcatch->fac_lga[ii][i]);
+    }
+  #endif
 
   ncov = 2;
   D_totcatch->fac_wgl = Mmatrix_2d(0,ncov-1,0,i_D_wgl->glm->xcov[0]->n_cov-1,sizeof(int),1);  // Free ok
@@ -1960,16 +1987,19 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
   #endif
   /* Factors corresponding to wgl intercept model */
   ind = 0;
-  for(i=0;i<(i_D_wgl->glm->xcov[0]->n_cov-1);i++) 
+  for(i=0;i<i_D_wgl->glm->xcov[0]->n_cov;i++) 
     {
       if(i_D_wgl->glm->xcov[0]->in_landings[i]==1)
-	D_totcatch->fac_wgl[0][i] = i_inCatch->fac_wgl_int[ind]-1; /* Assume start on zero */
+	{
+	  D_totcatch->fac_wgl[0][i] = i_inCatch->fac_wgl_int[ind]-1; /* Assume start on zero */
+	  ind++;
+	}
       else
 	D_totcatch->fac_wgl[0][i] = -1;
-      #ifdef DEBUG_PREDICT
-      fprintf(stderr,"fac_wgl[0][%d]=%d\n",i,D_totcatch->fac_wgl[0][i]);
-      #endif
-      ind++;
+    }
+  if(i_D_wgl->glm->xcov[0]->icell>0)
+    {
+      D_totcatch->fac_wgl[0][i_D_wgl->glm->xcov[0]->icell] = i_inCatch->fac_wgl_int[ind]-1;
     }
 
   #ifdef DEBUG_PREDICT
@@ -1980,13 +2010,24 @@ int makedata_totcatch(Data_age *i_D_age,Data_lin *i_D_lga,Data_lin *i_D_wgl,Data
   for(i=0;i<i_D_wgl->glm->xcov[1]->n_cov;i++)
     {
       if(i_D_wgl->glm->xcov[1]->in_landings[i]==1)
-	D_totcatch->fac_wgl[1][i] = i_inCatch->fac_wgl_slp[ind]-1; /* Assume start on zero */
+	{
+	  D_totcatch->fac_wgl[1][i] = i_inCatch->fac_wgl_slp[ind]-1; /* Assume start on zero */
+	  ind++;
+	}
       else
 	D_totcatch->fac_wgl[1][i] = -1;
-      #ifdef DEBUG_PREDICT
-      fprintf(stderr,"fac_wgl[1][%d]=%d\n",i,D_totcatch->fac_wgl[1][i]);
-      #endif
     }
+  if(i_D_wgl->glm->xcov[1]->icell>0)
+    {
+      D_totcatch->fac_wgl[1][i_D_wgl->glm->xcov[0]->icell] = i_inCatch->fac_wgl_int[ind]-1;
+    }
+  #ifdef DEBUG_PREDICT
+  for(ii=0;ii<i_D_wgl->glm->nxcov;ii++)
+    {
+      for(i=0;i<i_D_wgl->glm->xcov[ii]->n_cov;i++)
+	fprintf(stderr,"fac_wgl[%d][%d]=%d\n",ii,i,D_totcatch->fac_wgl[ii][i]);
+    }
+  #endif
 
   #ifdef DEBUG_PREDICT
   printf("Factors\n");
@@ -2228,38 +2269,25 @@ static int convert_tot_cov(Data_totcatch *i_D_totcatch,int *i_fac,Data_cov *i_xc
       #ifdef DEBUG_PREDICT
       fprintf(stderr,"j=%d, ncov=%d, i_neff=%d, icell=%d,ncell=%d,ifac=%d,ihaul=%d\n",j,i_xcov->n_cov,i_neff,i_xcov->icell,i_D_totcatch->nCell,i_fac[j],i_xcov->ihaul);
       #endif
-      if(j!=i_xcov->icell)
+      for(c=0;c<i_D_totcatch->nCell;c++)
 	{
-	  for(c=0;c<i_D_totcatch->nCell;c++)
+	  if(i_fac[j]==-1)
 	    {
-	      if(i_fac[j]==-1)
+	      o_xcov->c_cov[c][j] = -1;
+	    }
+	  else
+	    {
+	      k = 0;
+	      while(k<(i_xcov->n_fac[j]-1) && i_D_totcatch->factors[c][i_fac[j]]!=k)
+		k++;
+	      if(i_D_totcatch->factors[c][i_fac[j]]==k)
 		{
-		  o_xcov->c_cov[c][j] = -1;
+		  o_xcov->c_cov[c][j] = k;
 		}
 	      else
 		{
-		  k = 0;
-		  while(k<(i_xcov->n_fac[j]-1) && i_D_totcatch->factors[c][i_fac[j]]!=k)
-		    k++;
-		  if(i_D_totcatch->factors[c][i_fac[j]]==k)
-		    {
-		      o_xcov->c_cov[c][j] = k;
-		    }
-		  else
-		    {
-		      o_xcov->c_cov[c][j] = -1;
-		    }
+		  o_xcov->c_cov[c][j] = -1;
 		}
-	    }
-	}
-      else
-	{
-	  // Assume cell effects are numbered 1,2,....
-	  for(c=0;c<i_D_totcatch->nCell;c++)
-	    {
-	      o_xcov->c_cov[c][j] = i_D_totcatch->factors[c][i_fac[j]];
-	      //if(c<10)
-	      //	fprintf(stderr,"ifac[%d]=%d,c_cov[%d][%d]=%d\n",j,i_fac[j],c,j,o_xcov->c_cov[c][j]);
 	    }
 	}
     }

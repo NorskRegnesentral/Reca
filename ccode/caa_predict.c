@@ -1030,15 +1030,10 @@ int calculate_means_age(double *mu_age,int c,Age_struct *i_age,Data_age *i_D_age
       for(j=0;j<ncov;j++)
 	{
 	  k = i_D_totcatch->age_xcov[0]->c_cov[c][j];
-	  //if(j!=xcov->icell && j!=xcov->ihaulsize && k>-1)
 	  if(j!=xcov->ihaulsize && k>-1)
 	    {
 	      eff = i_age->par->eff[a][0][j][k];
 	    }
-	  //else if(j==xcov->icell)
-	  // {
-	  //   eff = i_age->par->cell[0][k];
-	  // }
 	  else if(j==xcov->ihaulsize || j==xcov->iboat)
 	    {
 	      eff = 0; // Excluding boat and haulsize effects in intercept since this is treated later
@@ -1109,11 +1104,8 @@ int calculate_means_lga(double *mu_lga,int c,LW_struct *i_length,Data_lin *i_D_l
       for(j=0;j<ncov;j++)
 	{
 	  k=i_D_totcatch->lga_xcov[i]->c_cov[c][j];
-	  //if(j!= xcov->icell && k > -1)
 	  if(k > -1)
 	    eff = i_length->par->eff[0][i][j][k];
-	  //else if (j==xcov->icell)
-	  // eff = i_length->par->cell[i][k];
 	  else if(i_D_lga->glm->xcov[i]->fix[j]==0&&j != xcov->ispat) 
 	    {
 	      eff = gennor(G_ZERO,sqrt(G_ONE/i_length->par->tau[i][j]));
@@ -1171,11 +1163,8 @@ int calculate_means_wgl(double *mu_wgl,int c,LW_struct *i_weight,Data_lin *i_D_w
       for(j=0;j<ncov;j++)
 	{
 	  k=i_D_totcatch->wgl_xcov[i]->c_cov[c][j];
-	  //if(j != xcov->icell && k > -1)
 	  if(k > -1)
 	    eff = i_weight->par->eff[0][i][j][k];
-	  //else if (j==xcov->icell)
-	  // eff = i_weight->par->cell[i][k];
 	  else if(i_D_wgl->glm->xcov[i]->fix[j]==0&&j != xcov->ispat) 
 	    eff = gennor(G_ZERO,sqrt(G_ONE/i_weight->par->tau[i][j]));
 	  else if(j==xcov->ispat)
