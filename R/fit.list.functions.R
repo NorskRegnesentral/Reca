@@ -68,7 +68,26 @@ make.lgaList<-function(data,common){
     g.a.par.init<-c(1,1,0.05)
   }
   cell<-make.cell(data,1) 
-  list(g.a.model=as.integer(g.a.model),g.a.par.init=g.a.par.init,res=cell$res)
+  if(1){  #remove haulcount from cell because it is only included in age model
+    if(any(cell$info$continuous==1)){
+      info<-cell$info
+      cov<-cell$covmat
+      ihsz<-cell$info$continuous==1
+      hsz<-cov[,ihsz]
+      cov<-cov[,!ihsz,drop=F]
+      info$random<-as.integer(info$random[!ihsz])
+      info$CAR<-as.integer(info$CAR[!ihsz])
+      info$continuous<-as.integer(info$continuous[!ihsz])
+      info$in.landings<-as.integer(info$in.landings[!ihsz])
+      info$nlev<-as.integer(info$nlev[!ihsz])
+      info$interaction<-as.integer(rep(0,sum(!ihsz)))
+      info$in.slopeModel<-as.integer(info$in.slopeModel[!ihsz])
+      cell$info<-info
+      cell$covmat<-cov
+      cell$n.col.cov<-ncol(cell$covmat)
+    }
+  }
+  list(g.a.model=as.integer(g.a.model),g.a.par.init=g.a.par.init,cell=cell)
 }
 #######################################################################
 #' Make input list for wgl data
@@ -83,6 +102,25 @@ make.wglList<-function(data,common){
   data$DataMatrix$samplingID<-as.integer(data$DataMatrix$samplingID)
   data$DataMatrix$otolithtype<-as.integer(data$DataMatrix$otolithtype)
   cell<-make.cell(data,1) 
+  if(1){  #remove haulcount from cell because it is only included in age model
+    if(any(cell$info$continuous==1)){
+      info<-cell$info
+      cov<-cell$covmat
+      ihsz<-cell$info$continuous==1
+      hsz<-cov[,ihsz]
+      cov<-cov[,!ihsz,drop=F]
+      info$random<-as.integer(info$random[!ihsz])
+      info$CAR<-as.integer(info$CAR[!ihsz])
+      info$continuous<-as.integer(info$continuous[!ihsz])
+      info$in.landings<-as.integer(info$in.landings[!ihsz])
+      info$nlev<-as.integer(info$nlev[!ihsz])
+      info$interaction<-as.integer(rep(0,sum(!ihsz)))
+      info$in.slopeModel<-as.integer(info$in.slopeModel[!ihsz])
+      cell$info<-info
+      cell$covmat<-cov
+      cell$n.col.cov<-ncol(cell$covmat)
+    }
+  }
   haul<-data$DataMatrix$samplingID
   nFishBoat<-table(haul)
   DataMatrix<-data$DataMatrix
