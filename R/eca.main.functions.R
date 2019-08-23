@@ -8,11 +8,20 @@
 #' @details
 #' AgeLength
 #' \itemize{
-#'  \item DataMatrix  - matrix with one row for each fish and columns \emph{age} (age in whole years), \emph{part.year} 
-#'  (fraction of year, i.e. realage=age+part.year), \emph{lengthCM} (length in centimeters), \emph{samplingID} (id for 
-#'  sampling unit, e.g. haul number, numbered from 1 to number of sampling units), \emph{partnumber}, \emph{partcount}, 
-#'  \emph{otolithtype} (classification when multiple stocks (type1 (Coastal cod) and type2 (Atlantic cod)): 
-#'  1-certain type1, 2-uncertain type1, 4-uncertain type2, 5-certain type2).
+#'  \item DataMatrix  - matrix with one row for each fish and columns \emph{age}, \emph{part.year},
+#'  \emph{lengthCM}, \emph{samplingID}, \emph{partnumber}, \emph{partcount}, 
+#'  \emph{otolithtype}.
+#'  \itemize{
+#'  \item age - age in whole years, missing values are allowed and denoted NA.
+#'  \item part.year - fraction of year, i.e. realage=age+part.year. Values are >0 and <=1. No missing values allowed. 
+#'  E.g. for seasonal sampling, part.year=0.25 for season 1 etc, for daily sampling, part.year=1/365 for day 1 etc.
+#'  \item lengthCM - length in centimeters. No missing values allowed.
+#'  \item samplingID - id for sampling unit, e.g. haul number, numbered from 1 to number of sampling units. No missing values allowed.
+#'  \item partnumber - 
+#'  \item partcount - 
+#'  \item otolithtype - classification when multiple stocks, type1 (Coastal cod) and type2 (Atlantic cod): 
+#'  1-certain type1, 2-uncertain type1, 4-uncertain type2, 5-certain type2. No missing values allowed when corresponding age is observed.
+#'  }
 #'  \item CovariateMatrix  - matrix with columns for the different covariates, e.g. \emph{constant}, \emph{season}, 
 #'  \emph{gearfactor}, \emph{spatial}, \emph{haulcount}, \emph{boat}. Each row corresponds to the samplingID \emph{in DataMatrix}.
 #'  \item info - matrix with one row for each covariate and with columns \emph{random} (=1 if random effect, =0 otherwise), 

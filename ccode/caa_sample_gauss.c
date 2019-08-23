@@ -523,7 +523,9 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 	  for(j=0;j<xcov->n_cov;j++)
 	    {
 	      //Constraints on fixed and random effects
-	      if(j!=xcov->ihaul && j!=xcov->iboat)   // Not including haul effects and boat effects
+	      //fprintf(stderr,"a=%d,i=%d,j=%d,ihaul=%d,iboat=%d,icell=%d,n_fac=%d,in_gr=%d\n",
+	      //      a,i,j,xcov->ihaul,xcov->iboat,xcov->icell,xcov->n_fac[j],i_gr->in_gr[i][j]);
+	      if(j!=xcov->ihaul && j!=xcov->iboat && j!=xcov->ispat)   // Not including haul effects, spatial or boat effects
 		{
 		  if(i_gr->in_gr[i][j] && xcov->n_fac[j]>1)
 		    {
@@ -561,6 +563,18 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
     }
   printf("Number of constraints inside categories:%d\n",constr->nc);
   #endif
+  
+  #ifdef LOG_FILE
+  fprintf(g_caa_log,"Number of groups: %d\n",ncat_max);
+  fprintf(g_caa_log,"Number of categories: %d\n",i_glm->nxcov);
+  for(i=0;i<i_glm->nxcov;i++)
+    {
+      fprintf(g_caa_log,"\tNumber of covariates: %d\n",i_glm->xcov[i]->n_cov);
+      for(j=0;j<i_glm->xcov[i]->n_cov;j++)
+	fprintf(g_caa_log,"\tNumber of factors for covariate %d: %d\n",j+1,i_glm->xcov[i]->n_fac[j]);
+    }
+  fprintf(g_caa_log,"Number of constraints inside categories:%d\n",constr->nc);
+  #endif
 
   if(i_glm->ncat>1) // age model
     {
@@ -582,10 +596,16 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
       #ifdef DEBUG_PROG
       printf("Number of constraints between categories: %d\n",n);
       #endif
+      #ifdef LOG_FILE
+      fprintf(g_caa_log,"Number of constraints between categories: %d\n",n);
+      #endif
     }
 
   #ifdef DEBUG_PROG
   printf("Total number of constraints: %d\n",constr->nc);
+  #endif
+  #ifdef LOG_FILE
+  fprintf(g_caa_log,"Total number of constraints: %d\n",constr->nc);
   #endif
 
   constr->a_matrix = CALLOC(constr->nc * i_gr->graph->n,double);  // Free ok
@@ -604,7 +624,7 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 	    cov[i][ii] = CALLOC(xcov->n_fac[j],int);
 	  ind_r = 0;
 	  while(ind_r<xcov->n_fac[j])
-	    {
+	    {	      
 	      for(k=0;k<fac_interact[i][0];k++)
 		{
 		  cov[i][0][ind_r] = k;
@@ -630,7 +650,19 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 	nfac = nfac*fac_interact[i][ii];
       }
   }
-  
+  #ifdef DEBUG_PROG
+  for(i=0;i<i_glm->nxcov;i++) {
+    for(j=0;j<xcov->n_cov;j++) {
+      fprintf(stderr,"i=%d,j=%d\n",i,j);
+      if(j==xcov->icell){
+	for(ii=0;ii<n_interact[i];ii++)
+	  fprintf(stderr,"cov[%d][%d][%d]=%d ",i,ii,j,cov[i][ii][j]);
+	fprintf(stderr,"\n");
+      }
+    }
+  }
+  #endif
+ 
   n_constr = 0;
   /* Constraints inside categories */
   for(a=0;a<ncat_max;a++) {
@@ -638,7 +670,7 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
       xcov = i_glm->xcov[i];
       for(j=0;j<xcov->n_cov;j++) {
 	//Constraints on fixed and random effects
-	if(j!=xcov->ihaul && j!=xcov->iboat) {  // Not including haul effects - but include cell effects
+	if(j!=xcov->ihaul && j!=xcov->iboat && j!=xcov->ispat) {  // Not including haul effects - but include cell effects
 	  if(i_gr->in_gr[i][j] && xcov->n_fac[j]>1) {
 	    if(j==xcov->icell) {
 	      for(ii=0;ii<n_interact[i];ii++) {
@@ -651,7 +683,7 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 			    ind = a*Nsub + i_gr->node[i][j][k];
 			    constr->a_matrix[constr->nc*ind+n_constr] = G_ONE;
 			    //if(a==0)
-			    // fprintf(stderr,"i=%d,j=%d,k=%d,ind=%d,ind_constr=%d,n_constr=%d\n",
+			    //fprintf(stderr,"i=%d,j=%d,k=%d,ind=%d,ind_constr=%d,n_constr=%d\n",
 			    //	      i,j,k,ind,constr->nc*ind+n_constr,n_constr);
 			  }
 		      }
@@ -664,7 +696,7 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 		ind = a*Nsub + i_gr->node[i][j][k];
 		constr->a_matrix[constr->nc*ind+n_constr] = G_ONE;
 		//if(a==0)
-		// fprintf(stderr,"i=%d,j=%d,k=%d,ind=%d,ind_constr=%d,n_constr=%d\n",i,j,k,ind,constr->nc*ind+n_constr,n_constr);
+		//fprintf(stderr,"i=%d,j=%d,k=%d,ind=%d,ind_constr=%d,n_constr=%d\n",i,j,k,ind,constr->nc*ind+n_constr,n_constr);
 	      }
 	      constr->e_vector[n_constr] = G_ZERO;
 	      n_constr++;
@@ -1153,15 +1185,14 @@ int sample_precision(int i_start_h,Eff_str *i_par,Data_glm *i_glm,int i_nHaul,in
 		nfac = i_nHaul;
 	      
 	      if(i_glm->ncat>1){
-		if(j== xcov->icell)
+		if(j== xcov->icell) // NB! n_fac_cell already subtracted 1!
 		  n = xcov->n_fac_cell*(i_glm->ncat-1);
 		else
 		  n = (nfac-1)*(i_glm->ncat-1);
-		//n = nfac*i_glm->ncat-(nfac+i_glm->ncat-1);
 	      } 
 	      else {
 		if(j== xcov->icell)
-		  n = xcov->n_fac_cell;  // already subtracted 1
+		  n = xcov->n_fac_cell;  // NB! n_fac_cell already subtracted 1
 		else
 		  n = nfac-1;
 	      }
@@ -1200,8 +1231,21 @@ int sample_precision(int i_start_h,Eff_str *i_par,Data_glm *i_glm,int i_nHaul,in
 	      //fprintf(stderr,"sample_precision haul:tau[%d][%d]=%f, ssq=%f,n=%d\n",
 	      //	i,j,i_par->tau[i][j],ssq,n);
               #ifdef LOG_FILE
-	      fprintf(g_caa_log,"sample_precision:tau[%d][%d]=%f, ssq=%f,n=%d\n",
-		      i,j,i_par->tau[i][j],ssq,n);
+	      if(i_glm->ncat>1){
+		if(j== xcov->icell)
+		  fprintf(g_caa_log,"sample_precision:tau[%d][%d]=%f, ssq=%f,n=%d = nfac(%d)*(ncat(%d)-1), prior1=%f, prior2=%f \n",
+			  i,j,i_par->tau[i][j],ssq,n,xcov->n_fac_cell,i_glm->ncat,i_par->prior_prec[i][j][0],i_par->prior_prec[i][j][1]);
+		else
+		  fprintf(g_caa_log,"sample_precision:tau[%d][%d]=%f, ssq=%f,n=%d = (nfac(%d)-1)*(ncat(%d)-1), prior1=%f, prior2=%f \n",
+			  i,j,i_par->tau[i][j],ssq,n,nfac,i_glm->ncat,i_par->prior_prec[i][j][0],i_par->prior_prec[i][j][1]);
+	      } else {
+		if(j== xcov->icell)
+		  fprintf(g_caa_log,"sample_precision:tau[%d][%d]=%f, ssq=%f,n=%d = nfac(%d), prior1=%f, prior2=%f \n",
+			  i,j,i_par->tau[i][j],ssq,n,xcov->n_fac_cell,i_par->prior_prec[i][j][0],i_par->prior_prec[i][j][1]);
+		else
+		  fprintf(g_caa_log,"sample_precision:tau[%d][%d]=%f, ssq=%f,n=%d = (nfac(%d)-1), prior1=%f, prior2=%f \n",
+			  i,j,i_par->tau[i][j],ssq,n,nfac,i_par->prior_prec[i][j][0],i_par->prior_prec[i][j][1]);
+	      }
               #endif
 	    } 
 	} // end for(j=0;j<xcov->n_cov;j++)
@@ -1233,8 +1277,13 @@ int sample_precision(int i_start_h,Eff_str *i_par,Data_glm *i_glm,int i_nHaul,in
 	  // fprintf(stderr,"sample_precision ar:tau_spat[%d]=%f,ar[%d]=%f: ssq=%f,n=%d,n_fac=%d,ncat=%d\n",
 	  //  i,i_par->tau[i][isp],i,i_par->ar[i],ssq,n,xcov->n_fac[isp],i_glm->ncat);
           #ifdef LOG_FILE
-	  fprintf(g_caa_log,"sample_precision ar:tau_spat[%d]=%f,ar[%d]=%f: ssq=%f,n=%d,n_fac=%d,ncat=%d\n",
-		  i,i_par->tau[i][isp],i,i_par->ar[i],ssq,n,xcov->n_fac[isp],i_glm->ncat);
+	  if(i_glm->ncat>1){
+	    fprintf(g_caa_log,"sample_precision ar:tau_spat[%d]=%f,ar[%d]=%f: ssq=%f,n=%d = (n_fac(%d)-1)*(ncat(%d)-1)\n",
+		    i,i_par->tau[i][isp],i,i_par->ar[i],ssq,n,xcov->n_fac[isp],i_glm->ncat);
+	  } else {
+	    fprintf(g_caa_log,"sample_precision ar:tau_spat[%d]=%f,ar[%d]=%f: ssq=%f,n=%d = (n_fac(%d)-1)\n",
+		    i,i_par->tau[i][isp],i,i_par->ar[i],ssq,n,xcov->n_fac[isp]);
+	  }
           #endif
 	}
       if(0){

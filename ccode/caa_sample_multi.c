@@ -1691,13 +1691,13 @@ static int Loglik_poisson_age(double *logll,double *x,
   080401:  Modified in order to take into account that sum_a alpha_{h,a}=0
 */
 int sample_precision_age_haul(int i_start_h,Eff_str *i_par,
-                              double **i_alpha,Data_glm *i_glm,int i_nHaul)
+                              double **i_alpha,Data_glm *i_glm,int i_nHaul,int i_nconstr)
 {
   int    n,a,h;
   double mu,ssq;
 
   i_glm->xcov[0]->n_cov--; //Not haul effect
-  n = (i_nHaul-i_start_h)*(i_glm->ncat-1);
+  n = (i_nHaul-i_start_h-1)*(i_glm->ncat-1);
   ssq = 0;
   for(h=i_start_h;h<i_nHaul;h++)
     {
@@ -1722,6 +1722,10 @@ int sample_precision_age_haul(int i_start_h,Eff_str *i_par,
     }
   i_par->tau_obs = gengam(i_par->prior_prec_obs[0]+G_HALF * ssq,
 			  i_par->prior_prec_obs[1]+G_HALF * (double) n);
+  #ifdef LOG_FILE
+  fprintf(g_caa_log,"sample_precision_age_haul:tau_obs=%f, ssq=%f,n=%d, nhaul=%d,ncat=%d, nconstr=%d, starthaul=%d \n",
+	  i_par->tau_obs,ssq,n,i_nHaul,i_glm->ncat,i_nconstr,i_start_h);
+  #endif
 
   i_glm->xcov[0]->n_cov++;
 

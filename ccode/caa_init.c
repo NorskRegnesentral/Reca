@@ -795,10 +795,6 @@ int init_age(Data_age *i_D_age,int i_age_errors,double *i_A2A,int i_coastal_cod,
 		  for(a=0;a<i_D_age->glm->ncat;a++)
 		    {
 		      age->par->prior_mean[a][i][j][k] = i_pri_age_eff_mean[ind2];
-                      #ifdef LOG_FILE
-		      fprintf(g_caa_log,"prior:fixed effect: factor %d: prior_mean[%d][%d][%d][%d]=%f, eff_mean[%d]=%f\n",
-			      k,a,i,j,k,age->par->prior_mean[a][i][j][k],ind2,i_pri_age_eff_mean[ind2]);
-     	              #endif
 		      ind2++;
 		    }
 		}

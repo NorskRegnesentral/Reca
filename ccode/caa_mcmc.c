@@ -682,7 +682,7 @@ int MCMC_it_age(int start_h,int i_force_acc,int i_len_only,
   #ifdef DEBUG_PROG
   printf("Sample precision parameters\n");
   #endif
-  err = sample_precision_age_haul(start_h,i_age->par,i_age->alpha,i_D_age->glm,i_nHaul);
+  err = sample_precision_age_haul(start_h,i_age->par,i_age->alpha,i_D_age->glm,i_nHaul,i_age->gr_str_f->constr->nc);
   if(err)
     {
       write_warning("MCMC_it_age:Error calling sample_precision_haul\n");

@@ -23,4 +23,4 @@ int copy_suff_lga_fix(Data_lin *i_D_lga,int i_start_h);
 int sample_age_alpha(Age_struct *i_age,Data_age *i_D_age,int i_start_h,int i_acc,
 		     int i_it,int *acc_h,int i_write_alpha);
 int sample_precision_age_haul(int i_start_h,Eff_str *i_par,
-			      double **i_alpha,Data_glm *i_glm,int i_nHaul);
+			      double **i_alpha,Data_glm *i_glm,int i_nHaul,int i_nconstr);

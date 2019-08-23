@@ -1004,11 +1004,11 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 	{
 	  i_inAge->cov->n_cov = nvec;
 	  i_inAge->cov->n_lev = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->n_lev[i];
-	  i_inLga->int_cov->n_cov = nvec;
-	  i_inLga->int_cov->n_lev = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->n_lev[i];
+	  //i_inLga->int_cov->n_cov = nvec;
+	  //i_inLga->int_cov->n_lev = ivec;
 	}
       else if (strcmp(varname, "n.col.cov") == 0)  // covariates
 	{
@@ -1021,9 +1021,9 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 	  i_inAge->cov->icell = -1;
 	  i_inAge->cov->iboat = -1;
 	  i_inAge->cov->ihaulsize = -1;
-	  i_inLga->int_cov->c_cov_i = CALLOC(ncov,int *);
-	  i_inLga->int_cov->c_cov_d = CALLOC(ncov,double *);
-	  i_inLga->int_cov->ispat = -1;
+	  //i_inLga->int_cov->c_cov_i = CALLOC(ncov,int *);
+	  //i_inLga->int_cov->c_cov_d = CALLOC(ncov,double *);
+	  //i_inLga->int_cov->ispat = -1;
 	  for(j=0;j<ncov;j++)
 	    {
 	      err = read_bin_var(fp, &varname, &nvec, &ivec, &dvec, &cvec, &nchar, &type);
@@ -1031,10 +1031,10 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 	      if(type==0)
 		{
 		  i_inAge->cov->c_cov_i[ncov_i] = ivec;
-		  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-		  for(i=0;i<nvec;i++)
-		    ivec[i] = i_inAge->cov->c_cov_i[ncov_i][i];
-		  i_inLga->int_cov->c_cov_i[ncov_i] = ivec;
+		  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+		  //for(i=0;i<nvec;i++)
+		  //ivec[i] = i_inAge->cov->c_cov_i[ncov_i][i];
+		  //i_inLga->int_cov->c_cov_i[ncov_i] = ivec;
 		  ncov_i++;
 		  if(strcmp(varname, "cell") ==0)
 		    i_inAge->cov->icell = j;
@@ -1042,10 +1042,10 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 	      else if(type==1)
 		{
 		  i_inAge->cov->c_cov_d[ncov_d] = dvec;
-		  dvec = CALLOC(nvec,double); // Create and copy new vector for Lga object
-		  for(i=0;i<nvec;i++)
-		    dvec[i] = i_inAge->cov->c_cov_d[ncov_d][i];
-		  i_inLga->int_cov->c_cov_d[ncov_d] = dvec;
+		  //dvec = CALLOC(nvec,double); // Create and copy new vector for Lga object
+		  //for(i=0;i<nvec;i++)
+		  //dvec[i] = i_inAge->cov->c_cov_d[ncov_d][i];
+		  //i_inLga->int_cov->c_cov_d[ncov_d] = dvec;
 		  ncov_d++;
 		  if(strcmp(varname, "haulcount") ==0) // FIND ihaulsize FROM "interaction" INSTEAD??
 		    i_inAge->cov->ihaulsize = j;
@@ -1060,44 +1060,44 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 		  return(1);
 		}
 	    }
-	  i_inLga->int_cov->icell = i_inAge->cov->icell;
-	  i_inLga->int_cov->ihaulsize = i_inAge->cov->ihaulsize;
+	  //i_inLga->int_cov->icell = i_inAge->cov->icell;
+	  //i_inLga->int_cov->ihaulsize = i_inAge->cov->ihaulsize;
 	  i_inAge->cov->n_cov_i = ncov_i;
 	  i_inAge->cov->n_cov_d = ncov_d;
-	  i_inLga->int_cov->n_cov_i = ncov_i;
-	  i_inLga->int_cov->n_cov_d = ncov_d;
+	  //i_inLga->int_cov->n_cov_i = ncov_i;
+	  //i_inLga->int_cov->n_cov_d = ncov_d;
 	}
       else if (strcmp(varname, "random") == 0)   //int.fix
 	{
 	  i_inAge->cov->random = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->random[i];
-	  i_inLga->int_cov->random = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->random[i];
+	  //i_inLga->int_cov->random = ivec;
 	}
       else if (strcmp(varname, "CAR") == 0)
 	{
 	  i_inAge->cov->spatial = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->spatial[i];
-	  i_inLga->int_cov->spatial = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->spatial[i];
+	  //i_inLga->int_cov->spatial = ivec;
 	}
       else if (strcmp(varname, "continuous") == 0)
 	{
 	  i_inAge->cov->continuous = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->continuous[i];
-	  i_inLga->int_cov->continuous = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->continuous[i];
+	  //i_inLga->int_cov->continuous = ivec;
 	}
       else if (strcmp(varname, "interaction") == 0)
 	{
 	  i_inAge->cov->interaction = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->interaction[i];
-	  i_inLga->int_cov->interaction = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->interaction[i];
+	  //i_inLga->int_cov->interaction = ivec;
 	}
       else if(strcmp(varname, "in.slopeModel") == 0)
 	{
@@ -1106,10 +1106,10 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
       else if(strcmp(varname, "in.landings") == 0)
 	{
 	  i_inAge->cov->in_landings = ivec;
-	  ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
-	  for(i=0;i<nvec;i++)
-	    ivec[i] = i_inAge->cov->in_landings[i];
-	  i_inLga->int_cov->in_landings = ivec;
+	  //ivec = CALLOC(nvec,int); // Create and copy new vector for Lga object
+	  //for(i=0;i<nvec;i++)
+	  //ivec[i] = i_inAge->cov->in_landings[i];
+	  //i_inLga->int_cov->in_landings = ivec;
 	}
       else if (strcmp(varname, "Sigma") == 0)  //int.Sigma.cell
 	{
@@ -1179,7 +1179,7 @@ int readdata_age_lga(char *i_filename, Data_orig *i_D_orig, Input_age *i_inAge, 
 */
 int readdata_lga(char *i_filename, Data_orig *i_D_orig, Input_lga *i_inLga)
 {
-  int           nvar,i,nchar,nvec,type,err;
+  int           nvar,var_count,i,j,nchar,nvec,type,ncov,ncov_i,ncov_d,err;
   int          *ivec;
   double       *dvec;
   char          buffer[MAX_STR];
@@ -1205,9 +1205,11 @@ int readdata_lga(char *i_filename, Data_orig *i_D_orig, Input_lga *i_inLga)
   i_inLga->g_a_sample_gamma = 1;
   i_inLga->fixed_model = 0;
 
-  for(i=0;i<nvar;i++)
+  var_count = 0;
+  while(var_count<nvar)
     {
       err = read_bin_var(fp, &varname, &nvec, &ivec, &dvec, &cvec, &nchar, &type); 
+      var_count++;
       if(err)
 	{
 	  write_warning("readdata_lga:Error calling read_bin_var\n");
@@ -1225,6 +1227,77 @@ int readdata_lga(char *i_filename, Data_orig *i_D_orig, Input_lga *i_inLga)
 	{
 	  i_inLga->int_cov->nconstr_cell = ivec[0];
 	  FREE(ivec);
+	}
+      else if (strcmp(varname, "nlev") == 0)
+	{
+	  i_inLga->int_cov->n_cov = nvec;
+	  i_inLga->int_cov->n_lev = ivec;
+	}
+      else if (strcmp(varname, "n.col.cov") == 0)  // covariates
+	{
+	  ncov = ivec[0];
+	  ncov_i = 0;
+	  ncov_d = 0;
+	  i_inLga->int_cov->c_cov_i = CALLOC(ncov,int *);
+	  i_inLga->int_cov->c_cov_d = CALLOC(ncov,double *);
+	  i_inLga->int_cov->ispat = -1;
+	  i_inLga->int_cov->icell = -1;
+	  i_inLga->int_cov->iboat = -1;
+	  i_inLga->int_cov->ihaulsize = -1;
+	  for(j=0;j<ncov;j++)
+	    {
+	      err = read_bin_var(fp, &varname, &nvec, &ivec, &dvec, &cvec, &nchar, &type);
+	      var_count++;
+	      if(type==0)
+		{
+		  i_inLga->int_cov->c_cov_i[ncov_i]= ivec;
+		  ncov_i++;
+		  if(strcmp(varname, "cell") ==0)
+		    i_inLga->int_cov->icell = j;
+		}
+	      else if(type==1)
+		{
+		  i_inLga->int_cov->c_cov_d[ncov_d] = dvec;
+		  ncov_d++;
+		  if(strcmp(varname, "haulcount") ==0) // FIND ihaulsize FROM "interaction" INSTEAD??
+		    i_inLga->int_cov->ihaulsize = j;
+		  else{
+		    write_warning("readdata_lga:Unknown continuous covariate\n");
+		    return(1);
+		  }
+		}
+	      else
+		{
+		  write_warning("readdata_lga:Unknown type for covariate\n");
+		  return(1);
+		}
+	    }
+	  i_inLga->int_cov->n_cov_i = ncov_i;
+	  i_inLga->int_cov->n_cov_d = ncov_d;
+	}
+      else if (strcmp(varname, "random") == 0)   //int.fix
+	{
+	  i_inLga->int_cov->random = ivec;
+	}
+      else if (strcmp(varname, "CAR") == 0)
+	{
+	  i_inLga->int_cov->spatial = ivec;
+	}
+      else if (strcmp(varname, "continuous") == 0)
+	{
+	  i_inLga->int_cov->continuous = ivec;
+	}
+      else if (strcmp(varname, "interaction") == 0)
+	{
+	  i_inLga->int_cov->interaction = ivec;
+	}
+      else if(strcmp(varname, "in.slopeModel") == 0)
+	{
+	  i_inLga->int_cov->in_slopeModel = ivec;
+	}
+      else if(strcmp(varname, "in.landings") == 0)
+	{
+	  i_inLga->int_cov->in_landings = ivec;
 	}
       else if (strcmp(varname, "g.a.model") == 0)
 	{
@@ -1580,14 +1653,14 @@ int readdata_hsz(char *i_filename, Data_orig *i_D_orig, Input_wgl *i_inHsz)
 		{
 		  i_inHsz->int_cov->c_cov_i[ncov_i] = ivec;
 		  if(strcmp(varname, "cell") ==0)
-		    i_inHsz->int_cov->icell = ncov_i;
+		    i_inHsz->int_cov->icell = j;
 		  ncov_i++;
 		}
 	      else if(type==1)
 		{
 		  i_inHsz->int_cov->c_cov_d[ncov_d] = dvec;
 		  if(strcmp(varname, "haulcount") ==0)
-		    i_inHsz->int_cov->ihaulsize = ncov_d;
+		    i_inHsz->int_cov->ihaulsize = j;
 		  ncov_d++;
 		}
 	      else
@@ -2466,7 +2539,9 @@ int add_object_info_age_lga(Input_common *i_inCommon, Data_orig *i_D_orig, Input
 
   if(i_inCommon->inc_hsz)
     {
+      #ifdef DEBUG_PROG
       fprintf(stderr,"add_object_info: Takes log of haulweight\n");
+      #endif
       for(i=0;i<nHaul;i++)
 	{
 	  i_D_orig->haulweight[i] = log(i_D_orig->haulweight[i]);

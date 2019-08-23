@@ -899,7 +899,8 @@ int write_glm_object(FILE *fp, Data_glm *i_glm, int i_print_format)
     {
       fprintf(g_caa_log,"n_cov=%d\n",i_glm->xcov[i]->n_cov);
       for(j=0;j<i_glm->xcov[i]->n_cov;j++)
-	fprintf(g_caa_log,"fac[%d]=%d,fix[%d]=%d\n",j,i_glm->xcov[i]->n_fac[j],j,i_glm->xcov[i]->fix[j]);
+	fprintf(g_caa_log,"fac[%d]=%d,fix[%d]=%d,interaction[%d]=%d,in.landings[%d]=%d\n",
+		j,i_glm->xcov[i]->n_fac[j],j,i_glm->xcov[i]->fix[j],j,i_glm->xcov[i]->interaction[j],j,i_glm->xcov[i]->in_landings[j]);
     }
   #endif
   
@@ -1157,11 +1158,13 @@ int read_hsz(Input_predict *i_inPredict, Data_lin **o_D_wgl)
 
   D_wgl = CALLOC(1,Data_lin);      
 
+  /* Read common parameters */
   ret = fread(&itmp,sizeof(int),1,g_caa_mcmc_hsz);
   i_inPredict->nMCMC_hsz = itmp;
   //fprintf(stderr,"nMCMC_hsz=%d\n",i_inPredict->nMCMC_hsz);
   ret = fread(ivec,sizeof(int),2,g_caa_mcmc_hsz);
   //fprintf(stderr,"numpar=%d,%d\n",ivec[0],ivec[1]);
+  ret = fread(&itmp,sizeof(int),1,g_caa_mcmc_hsz); // print_boat parameter, included since printed from wgl model
   
   /* Read wgl parameters */
   read_glm_object(g_caa_mcmc_hsz, &D_wgl->glm);
