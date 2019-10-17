@@ -393,13 +393,15 @@ static int calc_g_a_S_R(int i_ncat,double *i_a_vec,double *i_par,double *o_g_a)
 
   if(c!=1)
     fprintf(stderr,"NOTE! Change calc_g_a_S_R when c!=1\n");
-  //g_min = log(1-theta*exp(-gamma * amin));
-  //g_max = log(1-theta*exp(-gamma * amax));
-  //r = g_max-g_min;
+  g_min = log(1-theta*exp(-gamma * amin));
+  g_max = log(1-theta*exp(-gamma * amax));
+  r = g_max-g_min;
   for(i=0;i<i_ncat;i++)
     {
       a = i_a_vec[i];
-      o_g_a[i] = log(1-theta*exp(-gamma * a));
+      g = log(1-theta*exp(-gamma * a));
+      //o_g_a[i] = log(1-theta*exp(-gamma * a));
+      o_g_a[i] = (g-g_min)/r;
     }
 
   return(0);
@@ -421,15 +423,15 @@ int calc_g_a_S_R2(int i_ncat,double *i_a_vec,double *i_par,double *o_g_a)
 
   if(c!=1)
     fprintf(stderr,"NOTE! Change calc_g_a_S_R when c!=1\n");
-  // g_min = log(1-theta*exp(-gamma * amin));
-  //g_max = log(1-theta*exp(-gamma * amax));
-  //r = g_max-g_min;
+  g_min = log(1-theta*exp(-gamma * amin));
+  g_max = log(1-theta*exp(-gamma * amax));
+  r = g_max-g_min;
   for(i=0;i<i_ncat;i++)
     {
       a = i_a_vec[i];
-      //g = log(1-theta*exp(-gamma * a));
-      o_g_a[i] = log(1-theta*exp(-gamma * a));
-      //o_g_a[i] = (g-g_min)/r;
+      g = log(1-theta*exp(-gamma * a));
+      //o_g_a[i] = log(1-theta*exp(-gamma * a));
+      o_g_a[i] = (g-g_min)/r;
     }
 
   return(0);

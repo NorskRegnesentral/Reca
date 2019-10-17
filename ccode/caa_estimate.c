@@ -123,7 +123,7 @@ int main_model1(Input_common *i_inCommon, Input_age *i_inAge, Input_lga *i_inLga
       i_D_orig->boat[i] = 1;
       if(D_age->glm->xcov[0]->iboat > -1)
 	{
-	  i_D_orig->boat[i] = i_inAge->cov->c_cov_i[D_age->glm->xcov[0]->iboat][i];
+ 	  i_D_orig->boat[i] = D_age->glm->xcov[0]->c_cov[i][D_age->glm->xcov[0]->iboat];
 	  max_boat = MAX(max_boat,i_D_orig->boat[i]);
 	}
     }

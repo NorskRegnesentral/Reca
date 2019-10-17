@@ -1158,11 +1158,13 @@ int read_hsz(Input_predict *i_inPredict, Data_lin **o_D_wgl)
 
   D_wgl = CALLOC(1,Data_lin);      
 
+  /* Read common parameters */
   ret = fread(&itmp,sizeof(int),1,g_caa_mcmc_hsz);
   i_inPredict->nMCMC_hsz = itmp;
   //fprintf(stderr,"nMCMC_hsz=%d\n",i_inPredict->nMCMC_hsz);
   ret = fread(ivec,sizeof(int),2,g_caa_mcmc_hsz);
   //fprintf(stderr,"numpar=%d,%d\n",ivec[0],ivec[1]);
+  ret = fread(&itmp,sizeof(int),1,g_caa_mcmc_hsz); // print_boat parameter, included since printed from wgl model
   
   /* Read wgl parameters */
   read_glm_object(g_caa_mcmc_hsz, &D_wgl->glm);

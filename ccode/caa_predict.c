@@ -126,7 +126,7 @@ int predict(Input_predict *i_inPredict, Input_totcatch *i_inCatch, Input_cell *i
       #ifdef DEBUG_PREDICT
       printf("Read haulsize parameters from binary file\n");
       #endif
-      fprintf(stderr,"predict: Open %s for reading wgl parameters\n",i_inPredict->filename_hsz_mcmc2);
+      fprintf(stderr,"predict: Open %s for reading hsz parameters\n",i_inPredict->filename_hsz_mcmc2);
       if(!(g_caa_mcmc_hsz = fopen(i_inPredict->filename_hsz_mcmc2, "rb")))
 	{
 	  sprintf(buffer,"predict: Couldn't open file for reading: %s\n",i_inPredict->filename_hsz_mcmc2);

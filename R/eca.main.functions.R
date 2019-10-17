@@ -6,20 +6,41 @@
 #' @param Landings A list with elements connected to landings, not used until prediction.
 #' @param GlobalParameters A list with input parameters that are given by the user, see Details
 #' @details
-#' AgeLength
+#' AgeLength 
 #' \itemize{
-#'  \item DataMatrix  - matrix with one row for each fish and columns \emph{age} (age in whole years), \emph{part.year} 
-#'  (fraction of year, >0 and <=1, i.e. realage=age+part.year, e.g. for seasonal sampling part.year=0.25 for season 1 etc, 
-#'  for daily sampling part.year=1/365 for day 1 etc), \emph{lengthCM} (length in centimeters), \emph{samplingID} (id for 
-#'  sampling unit, e.g. haul number, numbered from 1 to number of sampling units), \emph{partnumber}, \emph{partcount}, 
-#'  \emph{otolithtype} (classification when multiple stocks (type1 (Coastal cod) and type2 (Atlantic cod)): 
-#'  1-certain type1, 2-uncertain type1, 4-uncertain type2, 5-certain type2).
+#'  \item DataMatrix  - matrix with one row for each fish and columns \emph{age}, \emph{part.year},
+#'  \emph{lengthCM}, \emph{samplingID}, \emph{partnumber}, \emph{partcount}, \emph{otolithtype}:
+#'  \itemize{
+#'  \item age - age in whole years, missing values are allowed and denoted NA.
+#'  \item part.year - fraction of year, i.e. realage=age+part.year. Values are >0 and <=1. No missing values allowed. 
+#'  E.g. for seasonal sampling, part.year=0.25 for season 1 etc, for daily sampling, part.year=1/365 for day 1 etc.
+#'  \item lengthCM - length in centimeters. No missing values allowed.
+#'  \item samplingID - id for sampling unit, e.g. haul number, numbered from 1 to number of sampling units. No missing values allowed.
+#'  \item partnumber - (DELNR), can be missing (in which case it is assumed that the haul comes in only one part). 
+#'  If it is not missing and there is more than one part in a haul, the fish in the parts are resampled up to the same total number 
+#'  using partcount as the probability (ie there is now one part with the same number of fish as the sum of the original parts)
+#'  \item partcount - (FANT), the size of the haul. If partcount is missing for this haul the haul is omitted.
+#'  \item otolithtype - classification when multiple stocks, type1 (Coastal cod) and type2 (Atlantic cod): 
+#'  1-certain type1, 2-uncertain type1, 4-uncertain type2, 5-certain type2. No missing values allowed when corresponding age is observed.
+#'  }
 #'  \item CovariateMatrix  - matrix with columns for the different covariates, e.g. \emph{constant}, \emph{season}, 
 #'  \emph{gearfactor}, \emph{spatial}, \emph{haulcount}, \emph{boat}. Each row corresponds to the samplingID \emph{in DataMatrix}.
-#'  \item info - matrix with one row for each covariate and with columns \emph{random} (=1 if random effect, =0 otherwise), 
-#'  \emph{CAR} (=0 if spatial effect, =0 otherwise), \emph{continuous} (=1 if continuous covariate, =0 otherwise), 
-#'  \emph{in.landings}, \emph{nlev} (number of levels for the different covariates), \emph{interaction} 
-#'  (=1 if including a cell effect/interaction term for the specified covariates), \emph{in.slopeModel}.
+#'  \item info - matrix with one row for each covariate and with columns \emph{random}, \emph{CAR}, \emph{continuous}, 
+#'  \emph{in.landings}, \emph{nlev}, \emph{interaction}, \emph{in.slopeModel}:
+#'  \itemize{
+#'  \item random - if the corresponding covariate is a random effect set random=1, if the covariate is a fixed effect set random=0.
+#'  \item CAR - if the corresponding covariate is a spatial effect set CAR=1, otherwise set CAR=0.
+#'  \item continuous - if the corresponding covariate is a continuous covariate set continuous=1, otherwise set continuous=0.
+#'  \item in.landings - if the corresponding covariate is given in the landing data set in.landings=1, otherwise set in.landings=0.
+#'  \item nlev - number of levels for the corresponding covariates. 
+#'  \item interaction - these elements define the cell interaction term. A cell is defined as a combination of selected covariates in the 
+#'  landings data. I.e. if gearfactor, spatial and season is included in the cell interaction term, then one cell represents 
+#'  one gear in one region in one season, and these 3 elements are set to 1 while the others are set to 0, and there will be 
+#'  nlev(gearfactor) times nlev(spatial) times nlev(season) different cells. 
+#'  This definition is regardless of the covariates being fixed or random.
+#'  \item in.slopeModel - if the corresponding covariate is included in the slope model set in.slope=1, otherwise set in.slope=0. 
+#'  (At this point only the covariate term is tested properly for being included in the slope model)
+#'  }
 #'  \item CARNeighbours - list with \emph{numNeighbours} and \emph{idNeighbours}.
 #'  \item AgeErrorMatrix - matrix that defines the probability of observing each age given the true age. Must be included if 
 #'  uncertainty in ageing is included in the analysis, i.e. GlobalParameters$age.error=1. The true ages are the 
@@ -116,9 +137,6 @@ eca.estimate <- function(AgeLength,WeightLength,Landings,GlobalParameters)
     win <- 0
   }
 
-  stoxdata<-list(AgeLength=AgeLength,WeightLength=WeightLength,
-                 Landings=Landings,GlobalParameters=GlobalParameters)
-
   if(is.null(GlobalParameters$seed)){
     GlobalParameters$seed <- sample(1:9999,1) #Generate a positive number
   }
@@ -131,6 +149,9 @@ eca.estimate <- function(AgeLength,WeightLength,Landings,GlobalParameters)
   if(GlobalParameters$CC==FALSE){
     GlobalParameters$CCerror <- FALSE
   }
+  
+  stoxdata<-list(AgeLength=AgeLength,WeightLength=WeightLength,
+                 Landings=Landings,GlobalParameters=GlobalParameters)
   
   ## Folder for input files
   cfilesfolder<-"cfiles/"

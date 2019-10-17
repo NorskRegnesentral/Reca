@@ -1,6 +1,6 @@
 ###################################################################
 #' @export   
-make.data.catch<-function(stoxdata,pc.age,pc.wgl){
+make.data.catch<-function(stoxdata,pc.age,pc.wgl){ 
   agecell<-sum(stoxdata$AgeLength$info[,"interaction"])>1
   wglcell<-sum(stoxdata$WeightLength$info[,"interaction"])>1
   agevars<-names(stoxdata$AgeLength$CovariateMatrix)[stoxdata$AgeLength$info[,"in.landings"]==1]
@@ -30,7 +30,6 @@ make.data.catch<-function(stoxdata,pc.age,pc.wgl){
        factors=factors,      
        catch=as.double(stoxdata$Landings$LiveWeightKG),
        midseason=as.double(stoxdata$Landings$AgeLengthCov$midseason))
-#       season=as.integer(stoxdata$Landings$AgeLengthCov$season))
 }
 ###################################################################
 #' @export   

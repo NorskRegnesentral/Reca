@@ -103,7 +103,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
       n_fac[ind] = i_cov->n_lev[i];
       ind++;
       if(i_cov->interaction[i]==1) // Use input from R instead?
-	n_fac_cell = n_fac_cell*i_cov->n_lev[i];
+	n_fac_cell = n_fac_cell*(i_cov->n_lev[i]-1);
       if(i_cov->spatial[i]==1)
 	{
 	  ispat = i;
@@ -132,7 +132,7 @@ int makedata_age1(int i_nHaul,int i_nAges,int *i_a_vec,
     }
 
   #ifdef DEBUG_PROG
-  fprintf(stderr,"ncov=%d,ispat=%d,icell=%d,iboat=%d,ihaulsize=%d,ihaul=%d,nfac_cell=%d\n",i_cov->n_cov,ispat,icell,iboat,ihaulsize,ihaul,n_fac_cell);
+  fprintf(stderr,"ncov=%d,ispat=%d,icell=%d,iboat=%d,ihaulsize=%d,ihaul=%d,(nfac_cell-1)=%d\n",i_cov->n_cov,ispat,icell,iboat,ihaulsize,ihaul,n_fac_cell);
   #endif
   
   // Intercept
@@ -597,7 +597,7 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
       n_fac[ind] = i_int_cov->n_lev[i];
       ind++;
       if(i_int_cov->interaction[i]==1)
-	n_fac_cell = n_fac_cell*i_int_cov->n_lev[i];
+	n_fac_cell = n_fac_cell*(i_int_cov->n_lev[i]-1);
       if(i_int_cov->spatial[i]==1)
 	ispat = i;
       if((i_int_cov->in_landings[i]==0)&&(i_int_cov->random[i]==1)&&(i!=icell))
@@ -608,13 +608,15 @@ int makedata_lin1(int i_nHaul,double *i_haulweight,
     n_fac[ncov-1] = D_lin->glm->nHaul;
     interaction[ncov-1] = 0;
     in_landings[ncov-1] = 0;
-  }
-  ihaul = ncov-1;
+    ihaul = ncov-1;
+  } else {
+    ihaul = -1; // Haul not included in haulsize model
+  }  
   ihaulsize = -1;  // Not included in lga or wgl model
 
   #ifdef DEBUG_PROG
   fprintf(stderr,"makedata_lin1: Include haul covariate as an option??\n");
-  fprintf(stderr,"ncov=%d,ispat=%d,icell=%d,iboat=%d,ihaulsize=%d,ihaul=%d,nfac_cell=%d\n",i_int_cov->n_cov,ispat,icell,iboat,ihaulsize,ihaul,n_fac_cell);
+  fprintf(stderr,"ncov=%d,ispat=%d,icell=%d,iboat=%d,ihaulsize=%d,ihaul=%d,(nfac_cell-1)=%d\n",i_int_cov->n_cov,ispat,icell,iboat,ihaulsize,ihaul,n_fac_cell);
   #endif
 
   if(i_inc_hsz==0)

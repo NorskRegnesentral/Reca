@@ -523,6 +523,9 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
 	  for(j=0;j<xcov->n_cov;j++)
 	    {
 	      //Constraints on fixed and random effects
+	      //if(j==xcov->ispat && a==0)// if not include, also change below,see L644
+	      //fprintf(stderr,"caa_sample_gauss.c: make_constr: Include constraint on spatial effect??\n");
+	      //if(j!=xcov->ihaul && j!=xcov->iboat && j!=xcov->ispat)   // Not including haul effects, spatial or boat effects
 	      if(j!=xcov->ihaul && j!=xcov->iboat)   // Not including haul effects and boat effects
 		{
 		  if(i_gr->in_gr[i][j] && xcov->n_fac[j]>1)
@@ -638,6 +641,7 @@ int make_constr(Graph_str *i_gr,Data_glm *i_glm)
       xcov = i_glm->xcov[i];
       for(j=0;j<xcov->n_cov;j++) {
 	//Constraints on fixed and random effects
+	//if(j!=xcov->ihaul && j!=xcov->iboat && j!=xcov->ispat) {  // Not including haul effects - but include cell effects
 	if(j!=xcov->ihaul && j!=xcov->iboat) {  // Not including haul effects - but include cell effects
 	  if(i_gr->in_gr[i][j] && xcov->n_fac[j]>1) {
 	    if(j==xcov->icell) {
@@ -1153,7 +1157,7 @@ int sample_precision(int i_start_h,Eff_str *i_par,Data_glm *i_glm,int i_nHaul,in
 		nfac = i_nHaul;
 	      
 	      if(i_glm->ncat>1){
-		if(j== xcov->icell)
+		if(j== xcov->icell)// NB! n_fac_cell already subtracted 1!
 		  n = xcov->n_fac_cell*(i_glm->ncat-1);
 		else
 		  n = (nfac-1)*(i_glm->ncat-1);
@@ -1161,7 +1165,7 @@ int sample_precision(int i_start_h,Eff_str *i_par,Data_glm *i_glm,int i_nHaul,in
 	      } 
 	      else {
 		if(j== xcov->icell)
-		  n = xcov->n_fac_cell;  // already subtracted 1
+		  n = xcov->n_fac_cell;  // NB! n_fac_cell already subtracted 1
 		else
 		  n = nfac-1;
 	      }

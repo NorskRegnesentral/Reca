@@ -68,14 +68,18 @@ read.fit.bin<-function(filename.mcmc1,filename.mcmc2,filename.hsz,stoxdata){
         lga.cc$nonlin[i] <- tmp[3]
       }
     }
-  }
-  # remove renormalisation when changing to continuous g-function
-  #amin.log <- log(min(par1$age.vec)+1/12)
-  #amax.log <- log(max(par1$age.vec)+1)
-  #lga <- renorm.lga(lga,amin.log,amax.log)
-  #if(par1$cc)
-  #  lga.cc <- renorm.lga(lga.cc,amin.log,amax.log)
+  } 
   close(fp1)
+  # remove renormalisation if changing to continuous g-function
+  if(par1$ga.model){
+    amin.log <- log(min(par1$age.vec)+1/12)
+    if(stoxdata$GlobalParameters$old.version==1)
+      amin.log <- log(min(par1$age.vec)+1/4)
+    amax.log <- log(max(par1$age.vec)+1)
+    lga <- renorm.lga(lga,amin.log,amax.log)
+    if(par1$cc)
+      lga.cc <- renorm.lga(lga.cc,amin.log,amax.log)
+  }
  
   fp2 <- file(filename.mcmc2,"rb")
   par2<-read.params.2(fp2)

@@ -1698,6 +1698,10 @@ int sample_precision_age_haul(int i_start_h,Eff_str *i_par,
 
   i_glm->xcov[0]->n_cov--; //Not haul effect
   n = (i_nHaul-i_start_h)*(i_glm->ncat-1);
+  #ifdef DEBUG_PROG
+  fprintf(stderr,"caa_sample_multi.c: sample_precision_age_haul: Use n = (i_nHaul-i_start_h-1)*(i_glm->ncat-1)?\n");
+  //n = (i_nHaul-i_start_h-1)*(i_glm->ncat-1);
+  #endif
   ssq = 0;
   for(h=i_start_h;h<i_nHaul;h++)
     {
