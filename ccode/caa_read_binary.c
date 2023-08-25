@@ -477,7 +477,6 @@ int readdata_common_ascii(char *i_filename, Input_common *i_inCommon, Data_orig 
 
   i_inCommon->constr = 1;
   i_inCommon->print_format = 0;  //print_format =0 (binary), 1 (ascii)
-  i_inCommon->old_version = 0;
   
   /* Open file for reading in ascii format */
   if(!(fp = fopen(i_filename, "r")))
@@ -604,10 +603,6 @@ int readdata_common_ascii(char *i_filename, Input_common *i_inCommon, Data_orig 
 	{
 	  res = fscanf(fp,"%d",&i_inCommon->print_format);
 	}
-      else if(strcmp(varname, "old.version") == 0)
-	{
-	  res = fscanf(fp,"%d",&i_inCommon->old_version);
-	}
       else if(strcmp(varname, "inc.haulsize") == 0)
 	{
 	  res = fscanf(fp,"%d",&i_inCommon->inc_hsz);
@@ -719,7 +714,6 @@ int readdata_common(char *i_filename, Input_common *i_inCommon, Data_orig *i_D_o
 
   i_inCommon->constr = 1;
   i_inCommon->print_format = 0;  //print_format =0 (binary), 1 (ascii)
-  i_inCommon->old_version = 0;
   
   /* Open file for reading in binary format */
   if(!(fp = fopen(i_filename, "rb")))
@@ -842,11 +836,6 @@ int readdata_common(char *i_filename, Input_common *i_inCommon, Data_orig *i_D_o
       else if(strcmp(varname, "print.format") == 0)
 	{
 	  i_inCommon->print_format = ivec[0];
-	  FREE(ivec);
-	}
-      else if(strcmp(varname, "old.version") == 0)
-	{
-	  i_inCommon->old_version = ivec[0];
 	  FREE(ivec);
 	}
       else if(strcmp(varname, "inc.haulsize") == 0)
@@ -2494,10 +2483,6 @@ int add_object_info_age_lga(Input_common *i_inCommon, Data_orig *i_D_orig, Input
 {
   int i,nHaul,nFish,n_cov,max_boat;
 
-  int old_version = 0;
-  if(i_inCommon->old_version)
-    old_version = 1;
-  
   i_inCommon->constr = 1;
   //  i_inCommon->print_format = 1;  //print_format =0 (binary), 1 (ascii)
 
@@ -2507,10 +2492,6 @@ int add_object_info_age_lga(Input_common *i_inCommon, Data_orig *i_D_orig, Input
   if(i_inLga->g_a_nSeason==0)
     {
       i_inLga->g_a_nSeason = 12;  //Use 12 seasons for continuous age
-      if(old_version){
-	i_inLga->g_a_nSeason = 4;  //Use 12 seasons for continuous age
-	fprintf(stderr,"add_object_info: NOTE! USING nSeason=4 !!!\n");
-      }
     }
 
   if(i_D_orig->coastal_cod)

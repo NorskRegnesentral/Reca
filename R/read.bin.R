@@ -73,8 +73,6 @@ read.fit.bin<-function(filename.mcmc1,filename.mcmc2,filename.hsz,stoxdata){
   # remove renormalisation if changing to continuous g-function
   if(par1$ga.model){
     amin.log <- log(min(par1$age.vec)+1/12)
-    if(stoxdata$GlobalParameters$old.version==1)
-      amin.log <- log(min(par1$age.vec)+1/4)
     amax.log <- log(max(par1$age.vec)+1)
     lga <- renorm.lga(lga,amin.log,amax.log)
     if(par1$cc)

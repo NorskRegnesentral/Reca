@@ -371,7 +371,6 @@ typedef struct
   int          print_boat;  /*!< \brief 1 if print boat effects, 0 otherwise */
   int          inc_hsz;     /*!< \brief 1 if haulsize is included in the model, 0 otherwise */
   int          print_format;/*!< \brief format of output files: 0=binary, 1=ascii*/
-  int          old_version;
 } Input_common;
 
 /*!
